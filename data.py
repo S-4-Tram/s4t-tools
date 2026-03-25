@@ -1,0 +1,2225 @@
+"""
+data.py
+All constants, exercise libraries, and configuration data for the
+Strength 4 Trampoline programme generator.
+
+This module contains no logic — only data structures.
+"""
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PROGRAMME TYPE DESCRIPTIONS
+# ═══════════════════════════════════════════════════════════════════════════
+
+PROGRAMME_DESCRIPTIONS = {
+    "force production": {
+        "senior": (
+            "Maximise peak vertical force into the bed. The knee extensors and plantar "
+            "flexors are the primary drivers. Trunk work is stiffness — the rigid link "
+            "that transfers lower-body force without energy leak."
+        ),
+        "youth": (
+            "Build maximum pushing power into the trampoline bed. Your quads and calves "
+            "do the heavy lifting. Trunk work keeps your body stiff so none of that "
+            "power is wasted."
+        ),
+        "junior": (
+            "Get stronger at pushing into the trampoline. Your legs do the work, and "
+            "your body stays tight so all that strength goes into your jumps."
+        ),
+    },
+    "repeated power": {
+        "senior": (
+            "Sustain high power output across multiple jumps. Priority shifts from peak "
+            "force to rate of force development and elastic energy return. Reactive "
+            "contacts, shorter rest, and repeated take-off quality are the key targets."
+        ),
+        "youth": (
+            "Keep your jump power high from the first bounce to the last. The focus is "
+            "on fast contacts, bouncing back quickly, and not losing quality as you "
+            "get tired."
+        ),
+        "junior": (
+            "Stay powerful through every single jump in your routine. Quick feet, fast "
+            "bouncing, and keeping your technique even when your legs are tired."
+        ),
+    },
+    "injury resilience": {
+        "senior": (
+            "Build tissue tolerance in the structures most loaded by trampoline — "
+            "patellar tendon, Achilles, and soleus. Exercises are slower, controlled, "
+            "and progressively loaded. Overhead and brace work protects the shoulder "
+            "and trunk under fatigue."
+        ),
+        "youth": (
+            "Strengthen the tendons and muscles that take the most impact in trampoline. "
+            "Exercises are slower and controlled to build up the body's ability to handle "
+            "repeated landings and jumps."
+        ),
+        "junior": (
+            "Make your body tougher so it can handle all the jumping and landing. "
+            "These exercises are done slowly and carefully to build strong muscles "
+            "and joints."
+        ),
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SESSION ORDER AND RATIONALE
+# ═══════════════════════════════════════════════════════════════════════════
+
+SESSION_ORDER = {
+    "force production":  ["strength", "jumps", "brace", "overhead"],
+    "repeated power":    ["jumps", "strength", "brace", "overhead"],
+    "injury resilience": ["overhead", "strength", "brace", "jumps"],
+}
+
+# Priority for section inclusion when session time is limited.
+# Last items in the list are dropped first.
+SESSION_PRIORITY = {
+    "force production":  ["strength", "jumps", "brace", "overhead"],
+    "repeated power":    ["jumps", "strength", "brace", "overhead"],
+    "injury resilience": ["strength", "brace", "overhead", "jumps"],
+}
+
+SESSION_RATIONALE = {
+    "force production": {
+        "senior": (
+            "Strength → Jumps → Brace → Overhead. Heavy bilateral loading primes the "
+            "neuromuscular system via post-activation potentiation (PAP); jumps follow "
+            "while that window is active. Brace reinforces force transfer under "
+            "accumulated load. Overhead closes — precision work whilst the legs recover."
+        ),
+        "youth": (
+            "Strength → Jumps → Brace → Overhead. Heavy lifts first because they "
+            "prime your body for explosive work. The jumps come straight after while "
+            "that effect is still active. Brace and overhead finish the session."
+        ),
+        "junior": (
+            "Strength → Jumps → Brace → Overhead. Big lifts wake your legs up. "
+            "Jumps come next while your legs are fired up. Then we do body control "
+            "and shoulder work to finish."
+        ),
+    },
+    "repeated power": {
+        "senior": (
+            "Jumps → Strength → Brace → Overhead. Reactive contacts and rate of force "
+            "development require peak nervous system availability — jumps go first. "
+            "Power-oriented strength consolidates the pattern under load. Brace and "
+            "overhead close when systemic fatigue is highest."
+        ),
+        "youth": (
+            "Jumps → Strength → Brace → Overhead. Jumps go first when your nervous "
+            "system is freshest — that is when you can produce the fastest contacts. "
+            "Strength work follows to back it up with power under load."
+        ),
+        "junior": (
+            "Jumps → Strength → Brace → Overhead. Jumping goes first because your "
+            "body is freshest and can move the fastest. Strength exercises come after "
+            "to make your legs even stronger."
+        ),
+    },
+    "injury resilience": {
+        "senior": (
+            "Overhead → Strength → Brace → Jumps. Shoulder position work requires "
+            "body awareness and precision — done fresh. Eccentric strength loading "
+            "follows; it does not need peak neural drive but requires attention. Brace "
+            "builds positional capacity under fatigue. Controlled reactive work closes "
+            "the session as tissue exposure, not power output."
+        ),
+        "youth": (
+            "Overhead → Strength → Brace → Jumps. Shoulder work goes first because "
+            "it needs the most concentration and body awareness. Slow strength follows, "
+            "then brace work. Controlled jumps finish to expose the tissues to light "
+            "landing work."
+        ),
+        "junior": (
+            "Overhead → Strength → Brace → Jumps. Shoulder exercises first while you "
+            "are concentrating the hardest. Then slow strength work, body control, and "
+            "gentle landing practice at the end."
+        ),
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION LABELS
+# ═══════════════════════════════════════════════════════════════════════════
+
+SECTION_LABELS = {
+    "athlete": {
+        "jumps": "JUMPS",
+        "overhead": "OVERHEAD",
+        "brace": "BRACE",
+        "strength": "STRENGTH",
+    },
+    "coach": {
+        "jumps": "J — JUMPS  (reactive contacts, elastic contribution, take-off quality)",
+        "overhead": "O — OVERHEAD  (shoulder strength at depression, scapular control)",
+        "brace": "B — BRACE  (trunk stiffness for force transfer, not trunk movement)",
+        "strength": "S — STRENGTH  (knee extensors and plantar flexors)",
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WEEK OVERVIEW
+# ═══════════════════════════════════════════════════════════════════════════
+
+WEEK_OVERVIEW = {
+    1: {
+        "coach": {
+            "purpose": "Establish positions and baseline load",
+            "focus": "Movement quality over weight; learn or reconfirm every cue",
+            "load": "~75% 1RM compound lifts; moderate on accessories",
+            "note": "This is the reference week — record loads and positions for comparison",
+        },
+        "athlete": {
+            "senior": (
+                "This week establishes your baseline. Focus on nailing every position "
+                "and cue. Load is moderate — quality of movement is the only standard."
+            ),
+            "youth": (
+                "Starting week. Get every position right and learn the cues. "
+                "Don't chase weight — focus on doing each exercise perfectly."
+            ),
+            "junior": (
+                "This is the starting week. Learn every exercise properly and focus "
+                "on doing them really well. Don't worry about going heavy yet."
+            ),
+        },
+    },
+    2: {
+        "coach": {
+            "purpose": "Increase load or volume from W1",
+            "focus": "Quality must match or improve before anything increases",
+            "load": "~80% 1RM compound lifts; small progressions on accessories",
+            "note": "Only progress exercises where W1 positions were solid",
+        },
+        "athlete": {
+            "senior": (
+                "Add load or reps from last week. Only increase if your positions "
+                "were solid — quality must match or improve before weight goes up."
+            ),
+            "youth": (
+                "Step it up from last week. Add a little more weight or an extra set, "
+                "but only if last week's technique was good."
+            ),
+            "junior": (
+                "A bit harder than last week. You can add a little weight or do more "
+                "reps, but only if you were doing the exercises well last week."
+            ),
+        },
+    },
+    3: {
+        "coach": {
+            "purpose": "Push intensity — highest demand week of the block",
+            "focus": "Compete with W2 numbers; intent and position are the metrics",
+            "load": "~85% 1RM compound lifts; highest volume on accessories",
+            "note": "Watch for technical breakdown under fatigue — positions matter most here",
+        },
+        "athlete": {
+            "senior": (
+                "Push intensity this week. Compete with last week's numbers. "
+                "Lifts should feel heavy and fast. Jump quality is the standard."
+            ),
+            "youth": (
+                "Hardest week. Push yourself on every exercise. Try to beat last "
+                "week's numbers but keep the technique locked in."
+            ),
+            "junior": (
+                "This is the toughest week. Work really hard but keep doing "
+                "everything properly. Your technique matters the most."
+            ),
+        },
+    },
+    4: {
+        "coach": {
+            "purpose": "Peak load, fewest reps — maximum intent per repetition",
+            "focus": "Let the quality demonstrate the adaptation",
+            "load": "87–90% 1RM on key lifts; reduced volume across all exercises",
+            "note": "Every rep is a display of the quality built across the previous three weeks",
+        },
+        "athlete": {
+            "senior": (
+                "Peak week. Heaviest loads, fewest reps. Maximum intent on every "
+                "single rep. Let your movement quality show the work you have done."
+            ),
+            "youth": (
+                "Final week of the block. Heaviest weights but fewer reps. Make "
+                "every single rep count — this is where you show what you have built."
+            ),
+            "junior": (
+                "Last week of the block. The weights are the heaviest but you do "
+                "fewer reps. Make every single one your best."
+            ),
+        },
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COMPETITION PROXIMITY OVERRIDES
+# ═══════════════════════════════════════════════════════════════════════════
+
+COMPETITION_PROXIMITY = {
+    "4+ weeks": {
+        "volume_modifier": 0,
+        "max_exercises_per_section": None,
+        "exclude_heavy_eccentrics": False,
+        "note": None,
+    },
+    "2-3 weeks": {
+        "volume_modifier": -1,  # one fewer set per exercise
+        "max_exercises_per_section": None,
+        "exclude_heavy_eccentrics": False,
+        "note": {
+            "senior": "Approaching competition — volume reduced, intensity maintained.",
+            "youth": "Competition is getting close — doing less volume to stay fresh.",
+            "junior": "Competition is coming up — we do a bit less so your body stays fresh.",
+        },
+    },
+    "taper": {
+        "volume_modifier": -1,
+        "max_exercises_per_section": 2,
+        "exclude_heavy_eccentrics": True,
+        "note": {
+            "senior": "Taper phase — reduced volume, no heavy eccentrics, no new exercises.",
+            "youth": "Taper week — lighter sessions to keep you sharp without tiring you out.",
+            "junior": "Easy week before competition — light sessions to keep your body ready.",
+        },
+    },
+    "competition week": {
+        "volume_modifier": -2,
+        "max_exercises_per_section": 1,
+        "exclude_heavy_eccentrics": True,
+        "note": {
+            "senior": "Competition week — activation only. No strength work. Stay sharp.",
+            "youth": "Competition week — just light activation to keep everything switched on.",
+            "junior": "Competition week — just gentle warm-up exercises to stay ready.",
+        },
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LIMITING FACTOR MAPPINGS
+# ═══════════════════════════════════════════════════════════════════════════
+
+LIMITING_FACTORS = {
+    "ankle stiffness": {
+        "section_bias": "jumps",
+        "microdose_priority": "ankle",
+        "description": {
+            "senior": "Ankle stiffness is the primary limiter — biasing jump and calf volume.",
+            "youth": "Your ankle stiffness is the main area to improve — extra calf and jump work this block.",
+            "junior": "We are focusing on making your ankles stronger and stiffer for jumping.",
+        },
+    },
+    "low force output": {
+        "section_bias": "strength",
+        "microdose_priority": "knee",
+        "description": {
+            "senior": "Low force output is the primary limiter — biasing knee extensor and plantar flexor volume.",
+            "youth": "Your pushing force needs work — extra strength exercises for your legs this block.",
+            "junior": "We are focusing on making your legs stronger for bigger pushes into the trampoline.",
+        },
+    },
+    "hip stability": {
+        "section_bias": "brace",
+        "microdose_priority": "hip",
+        "description": {
+            "senior": "Hip stability is the primary limiter — biasing lateral chain and glute med work.",
+            "youth": "Your hip stability needs work — extra side-body and glute exercises this block.",
+            "junior": "We are focusing on making your hips strong and steady for better landings.",
+        },
+    },
+    "trunk stiffness": {
+        "section_bias": "brace",
+        "microdose_priority": "trunk",
+        "description": {
+            "senior": "Trunk stiffness is the primary limiter — biasing anti-extension and force transfer work.",
+            "youth": "Your trunk stiffness needs work — extra bracing and body-tension exercises this block.",
+            "junior": "We are focusing on keeping your body really tight and strong in the middle.",
+        },
+    },
+    "overhead control": {
+        "section_bias": "overhead",
+        "microdose_priority": "shoulder",
+        "description": {
+            "senior": "Overhead control is the primary limiter — biasing scapular and shoulder position work.",
+            "youth": "Your overhead position needs work — extra shoulder and scapula exercises this block.",
+            "junior": "We are focusing on making your shoulders strong and steady when your arms are up.",
+        },
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MICRODOSE PRIORITY PER PROGRAMME TYPE
+# ═══════════════════════════════════════════════════════════════════════════
+
+MICRODOSE_PRIORITIES = {
+    "force production":  ["ankle", "knee", "trunk", "hip", "shoulder"],
+    "repeated power":    ["ankle", "hip", "knee", "trunk", "shoulder"],
+    "injury resilience": ["knee", "ankle", "trunk", "hip", "shoulder"],
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EXERCISE LIBRARY
+#
+# Structure per exercise:
+#   name: str
+#   equipment: "full" | "limited" | "bodyweight"  (minimum required)
+#   eccentricHeavy: bool  (flagged for taper exclusion)
+#   weeks: list of 4 dicts, each with:
+#       prescription: str  (sets x reps @ load)
+#       cue: dict with senior/youth/junior strings
+#
+# Equipment variants are provided as separate exercises in the pool.
+# The generator picks the first exercise whose equipment requirement
+# is met by the athlete's available equipment.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _ex(name, equipment, eccentric_heavy, weeks, traits=None):
+    """Shorthand constructor for an exercise entry."""
+    return {
+        "name": name,
+        "equipment": equipment,
+        "eccentric_heavy": eccentric_heavy,
+        "weeks": weeks,
+        "traits": traits or {},
+    }
+
+
+def _week(prescription, senior, youth, junior):
+    """Shorthand constructor for a week entry."""
+    return {
+        "prescription": prescription,
+        "cue": {"senior": senior, "youth": youth, "junior": junior},
+    }
+
+
+# ── FORCE PRODUCTION ────────────────────────────────────────────────────
+
+_FP_STRENGTH = [
+    # --- Back Squat variants ---
+    _ex("Barbell Back Squat", "full", False, [
+        _week("3 x 5 @ 75% 1RM",
+              "Brace as though the bed is about to contact you; drive the floor away, not the bar up; 3 min rest",
+              "Brace your trunk hard, then push the floor away from you; 3 min rest between sets",
+              "Squeeze your tummy tight, then push the ground away with your feet; rest 3 minutes"),
+        _week("4 x 5 @ 80% 1RM",
+              "One extra set; same brace and drive intent; do not reduce rest time",
+              "One more set than last week; same technique, same rest",
+              "One more set than last week; do it exactly the same way"),
+        _week("4 x 4 @ 85% 1RM",
+              "Heavier, fewer reps; reset the full brace before each descent, not just at the top",
+              "Heavier but fewer reps; reset your brace before every single squat",
+              "Heavier but you do fewer; get tight before every single squat"),
+        _week("5 x 3 @ 87–90% 1RM",
+              "Peak load; 3–4 min rest; treat every rep as a competition attempt",
+              "Heaviest week; long rest; make every single rep your best",
+              "The heaviest week; lots of rest; make every rep perfect"),
+    ], traits={"joint_action": "knee_extension", "rom": "short", "load": "heavy", "tempo": "slow"}),
+    _ex("Dumbbell Goblet Squat", "limited", False, [
+        _week("3 x 8 @ moderate load",
+              "Hold the dumbbell at chest height; stay upright and drive through the whole foot; brace hard at the bottom",
+              "Hold the weight at your chest; stay tall and push the ground away",
+              "Hold the weight at your chest; stand up tall and push hard through your feet"),
+        _week("4 x 8 @ moderate-heavy load",
+              "One extra set; same upright torso and full brace; increase load only if positions were solid",
+              "One more set; keep the same tall position; only go heavier if last week was clean",
+              "One more set; stay tall; only use a heavier weight if last week was easy"),
+        _week("4 x 6 @ heavy load",
+              "Fewer reps, heavier; full depth and brace reset at the top of each rep",
+              "Fewer reps, heavier weight; full depth and reset your brace each time",
+              "Fewer reps but heavier; go all the way down and get tight at the top each time"),
+        _week("5 x 5 @ heaviest manageable",
+              "Peak load; maintain full depth and upright torso; 2 min rest between sets",
+              "Heaviest week; keep full depth and stay tall; 2 min rest",
+              "Heaviest week; go all the way down and stay tall; rest 2 minutes"),
+    ]),
+    _ex("Bodyweight Squat with 3-sec Pause", "bodyweight", False, [
+        _week("3 x 10 with 3-sec pause at bottom",
+              "Pause at the bottom for a full 3 seconds; maintain trunk brace and upright position throughout",
+              "Hold at the bottom for 3 seconds; stay tall and keep your trunk tight",
+              "Hold at the bottom and count to 3; stay tall and keep your tummy tight"),
+        _week("4 x 10 with 3-sec pause",
+              "Extra set; the pause should feel harder, not easier — maintain the brace throughout",
+              "One more set; the hold should still feel hard — don't relax at the bottom",
+              "One more set; keep squeezing tight at the bottom, don't relax"),
+        _week("4 x 8 with 5-sec pause",
+              "Longer pause; fewer reps; this builds the same position strength as a loaded squat",
+              "Longer hold at the bottom; fewer reps; this builds real strength in that position",
+              "Hold at the bottom for 5 seconds this time; fewer reps but harder"),
+        _week("5 x 6 with 5-sec pause",
+              "Peak time under tension; maintain full brace quality across all five sets",
+              "Hardest week; keep the quality across every set; don't rush the holds",
+              "Hardest week; keep every hold strong; don't rush"),
+    ]),
+    # --- Split Squat variants ---
+    _ex("Bulgarian Split Squat (rear foot elevated)", "full", False, [
+        _week("3 x 6 each leg @ bodyweight",
+              "Front shin stays vertical; push through the whole foot; feel the quad loading directly into the knee",
+              "Keep your front shin upright; push through your whole foot; feel the front leg doing the work",
+              "Keep your front shin straight up; push through your whole foot; feel your front leg working hard"),
+        _week("3 x 6 each leg + 10 kg dumbbells",
+              "Same shin position; add load only if W1 quality was clean",
+              "Same shin position with weights; only add load if last week's form was good",
+              "Same position but with weights; only use them if last week was good"),
+        _week("4 x 5 each leg + 15–20 kg",
+              "Extra set; knee tracks over the 2nd toe throughout the full range",
+              "Extra set, heavier; make sure your knee points over your second toe the whole time",
+              "One more set with more weight; keep your knee pointing over your toes"),
+        _week("4 x 5 each leg + 20–25 kg",
+              "Heaviest loading; 2 min rest between legs; this is the unilateral bed drive pattern",
+              "Heaviest week; 2 min rest between legs; this is how one leg drives into the bed",
+              "Heaviest week; rest 2 minutes between legs; this is one leg pushing hard"),
+    ], traits={"joint_action": "hip_extension", "rom": "short", "load": "heavy", "tempo": "slow"}),
+    _ex("Dumbbell Split Squat (both feet on floor)", "limited", False, [
+        _week("3 x 8 each leg @ light dumbbells",
+              "Feet split front and back; lower until the back knee nearly touches the floor; drive up through the front foot",
+              "Split your feet; lower until your back knee nearly touches the floor; push up through the front foot",
+              "One foot forward, one back; go down until your back knee almost touches the floor; push up with the front leg"),
+        _week("3 x 8 each leg @ moderate dumbbells",
+              "Increase load; maintain the knee tracking and upright trunk",
+              "Heavier this week; keep your knee tracking and body upright",
+              "A bit heavier; keep your body tall and your knee going the right way"),
+        _week("4 x 6 each leg @ moderate-heavy",
+              "Extra set; fewer reps; full range and controlled descent every rep",
+              "Extra set; fewer reps; go all the way down and control it",
+              "One more set; fewer reps; go all the way down slowly"),
+        _week("4 x 6 each leg @ heavy",
+              "Peak loading; 90 secs rest between legs; same range and control as W1",
+              "Heaviest week; same depth and control as the first week",
+              "Heaviest week; go just as low and just as controlled as week 1"),
+    ]),
+    _ex("Bodyweight Reverse Lunge with Pause", "bodyweight", False, [
+        _week("3 x 8 each leg with 2-sec pause at bottom",
+              "Step back into a lunge; pause 2 seconds at the bottom; drive up through the front leg",
+              "Step back, hold for 2 seconds at the bottom, then push up with the front leg",
+              "Step back, hold for 2 seconds, then push up with the front leg"),
+        _week("4 x 8 each leg with 2-sec pause",
+              "Extra set; maintain the pause quality and upright trunk",
+              "One more set; keep the hold and stay tall",
+              "One more set; keep holding and stay tall"),
+        _week("4 x 6 each leg with 3-sec pause",
+              "Longer pause; the front quad should be under heavy tension by the end",
+              "Longer hold; your front leg should be working really hard by the end",
+              "Hold for 3 seconds this time; your front leg will work really hard"),
+        _week("5 x 6 each leg with 3-sec pause",
+              "Peak volume and time under tension; same depth and control across all sets",
+              "Hardest week; same depth and control through every set",
+              "Hardest week; keep going just as deep and just as controlled"),
+    ]),
+    # --- Calf Raise variants ---
+    _ex("Heavy Standing Calf Raise (machine or barbell)", "full", False, [
+        _week("4 x 6",
+              "3-sec descent, explosive drive up; load the bottom stretch, not just the shortened position at the top",
+              "3 seconds going down, fast going up; feel the full stretch at the bottom",
+              "Go down slowly for 3 seconds, then push up fast; feel the stretch at the bottom"),
+        _week("4 x 6 + 5–10% load",
+              "Same tempo; if the descent shortens, reduce weight before adding more",
+              "Same speed; if you can't go all the way down, the weight is too heavy",
+              "Same speed up and down; if you can't go all the way down, use less weight"),
+        _week("5 x 5 + 10% load",
+              "Extra set; only progress if W2 reps were explosive from the full bottom range",
+              "One more set; only go heavier if last week's reps were fast from the bottom",
+              "One more set; only go heavier if last week felt strong"),
+        _week("5 x 4 + 15% load",
+              "Peak ankle loading; 2 min rest; this is the plantar flexor drive that completes every take-off",
+              "Heaviest calf week; 2 min rest; this is the ankle push that finishes every jump",
+              "Heaviest week for your calves; rest 2 minutes; this is the push that finishes every jump"),
+    ], traits={"joint_action": "plantar_flexion", "load": "heavy", "contraction_mode": "isometric"}),
+    _ex("Single-Leg Calf Raise off Step (loaded)", "limited", False, [
+        _week("3 x 8 each leg + dumbbell",
+              "Full range off a step; pause 1 sec at top and bottom; feel the full stretch before driving up",
+              "Full range on a step; hold 1 second at the top and bottom; feel the stretch at the bottom",
+              "Stand on a step on one leg; hold at the top and bottom for 1 second each"),
+        _week("3 x 8 each leg + heavier dumbbell",
+              "Increase load; maintain full range; if the range shortens, go lighter",
+              "Heavier; keep the same range; if you can't go as deep, reduce the weight",
+              "A bit heavier; keep going all the way up and all the way down"),
+        _week("4 x 8 each leg + heavier",
+              "Extra set; full range is non-negotiable; don't sacrifice depth for load",
+              "One more set; don't shorten the range for more weight",
+              "One more set; keep going all the way down even with more weight"),
+        _week("4 x 6 each leg + heaviest",
+              "Fewer reps, heaviest load; treat each rep as a maximum press off the floor",
+              "Fewer reps, heaviest weight; push as hard as you can on every rep",
+              "Fewer reps but the heaviest weight; push really hard on every single one"),
+    ]),
+    _ex("Single-Leg Calf Raise off Step (bodyweight)", "bodyweight", False, [
+        _week("3 x 12 each leg",
+              "Full range off a step; pause 1 sec at top and bottom; build control through the entire range",
+              "Full range on a step; hold 1 second at top and bottom",
+              "Stand on a step on one leg; hold at the top and bottom for 1 second"),
+        _week("3 x 15 each leg",
+              "More reps; same full range and pause; the volume is the progression here",
+              "More reps; same holds at top and bottom; the extra reps are the challenge",
+              "More reps; keep holding at the top and bottom"),
+        _week("4 x 15 each leg",
+              "Extra set; maintain quality across all four sets; this is significant calf volume at bodyweight",
+              "One more set; keep the quality through every set",
+              "One more set; keep doing them well all the way through"),
+        _week("4 x 12 each leg with 3-sec eccentric",
+              "Slow the descent to 3 seconds; fewer reps but higher time under tension; the slow lower builds tendon capacity",
+              "Slow the lowering to 3 seconds; fewer reps but harder; the slow part builds strength",
+              "Go down slowly for 3 seconds; fewer reps but much harder"),
+    ]),
+    # ── Test subset from EXERCISE_DATABASE ────────────────────────────
+    _ex("Hip Thrust Partial Range ISO", "limited", False, [
+        _week("3 x 8 @ moderate load",
+              "Short range; hold 2 sec at top; maximal glute squeeze",
+              "Short range; hold 2 seconds at the top; squeeze hard",
+              "Short range; hold at the top for 2 seconds; squeeze hard"),
+        _week("4 x 8 @ moderate-heavy load",
+              "Extra set; same short range and hold; increase load only if positions held",
+              "One more set; same range and hold; only go heavier if last week was solid",
+              "One more set; same hold; only go heavier if last week was good"),
+        _week("4 x 6 @ heavy load",
+              "Fewer reps, heavier; maintain the short range and maximal contraction",
+              "Fewer reps, heavier; keep the same short range and squeeze",
+              "Fewer reps but heavier; keep squeezing at the top"),
+        _week("5 x 5 @ heaviest manageable",
+              "Peak load; 2 min rest; this is the hip drive pattern",
+              "Heaviest week; 2 min rest; this is your hip drive",
+              "Heaviest week; rest 2 minutes; push as hard as you can"),
+    ], traits={"joint_action": "hip_extension", "rom": "short", "load": "heavy", "tempo": "slow"}),
+    _ex("Romanian Deadlift", "full", False, [
+        _week("3 x 8 @ 60% 1RM",
+              "Hinge from the hip; bar stays close; feel the hamstrings load through the descent",
+              "Hinge at the hips; keep the bar close; feel the back of your legs working",
+              "Bend at the hips; keep the bar close to your legs; feel the stretch"),
+        _week("3 x 8 @ 65% 1RM",
+              "Same hinge pattern; slight load increase; maintain full range",
+              "Same movement; a little heavier; keep the full range",
+              "Same movement but a bit heavier; go all the way down"),
+        _week("4 x 6 @ 70% 1RM",
+              "Extra set, fewer reps, heavier; control the eccentric",
+              "One more set; fewer reps, heavier; control the way down",
+              "One more set; fewer reps but heavier; go down slowly"),
+        _week("4 x 5 @ 75% 1RM",
+              "Peak load; 2 min rest; treat every rep as a position check",
+              "Heaviest week; 2 min rest; make every rep perfect",
+              "Heaviest week; rest 2 minutes; do every rep perfectly"),
+    ], traits={"joint_action": "hip_extension", "load": "heavy", "tempo": "slow"}),
+    _ex("Bent Knee Copenhagen", "bodyweight", False, [
+        _week("3 x 20 sec hold each side",
+              "Top knee on bench; hold rigid line from shoulder to knee; adductors lock the position",
+              "Top knee on bench; hold a straight line; feel the inside of your leg working",
+              "Knee on the bench; hold your body straight; feel the inside of your leg"),
+        _week("3 x 25 sec hold each side",
+              "Longer hold; same rigid position; breathe and maintain",
+              "Hold for longer; same position; keep breathing",
+              "Hold for longer; stay straight; keep breathing"),
+        _week("4 x 20 sec hold each side",
+              "Extra set; same hold quality; position matters more than duration",
+              "One more set; same hold; keep your body straight",
+              "One more set; hold the same position"),
+        _week("4 x 25 sec hold each side",
+              "Peak volume; maintain full adductor engagement throughout",
+              "Hardest week; keep squeezing the whole time",
+              "Hardest week; keep squeezing your legs the whole time"),
+    ], traits={"joint_action": "hip_adduction", "load": "bodyweight", "contraction_mode": "isometric"}),
+    _ex("Spanish Squat", "limited", False, [
+        _week("3 x 10 with band at knee",
+              "Band pulls knee forward; resist and drive through the quad; short range at the bottom",
+              "Band pulls your knee; push back and feel your quad; stay in the bottom range",
+              "Band pulls your knee forward; push back with your leg; stay low"),
+        _week("3 x 12 with band at knee",
+              "More reps; same short range and quad focus; do not let the band pull you forward",
+              "More reps; same position; do not let the band win",
+              "More reps; stay in the same position; push against the band"),
+        _week("4 x 10 with band at knee",
+              "Extra set; same quality; this is isolated knee extensor volume",
+              "One more set; same quality through every rep",
+              "One more set; keep doing them the same way"),
+        _week("4 x 8 with heavier band",
+              "Heavier band; fewer reps; maintain the short range position",
+              "Harder band; fewer reps; keep the same position",
+              "Harder band; fewer reps; stay in the same position"),
+    ], traits={"joint_action": "knee_extension", "rom": "short"}),
+    _ex("Nordic", "bodyweight", True, [
+        _week("3 x 3 with controlled lower",
+              "Slow eccentric only; 5 sec descent; catch yourself at the bottom and push back up",
+              "Lower yourself slowly for 5 seconds; push yourself back up at the bottom",
+              "Go down as slowly as you can for 5 seconds; push yourself back up"),
+        _week("3 x 4 with controlled lower",
+              "One more rep; same 5 sec eccentric; full range descent",
+              "One more rep; same slow lowering; go all the way down",
+              "One more rep; go down the same slow way"),
+        _week("4 x 3 with controlled lower",
+              "Extra set; same eccentric control; this is supramaximal hamstring loading",
+              "One more set; same slow lowering; this is very hard on your hamstrings",
+              "One more set; go down slowly every time"),
+        _week("4 x 4 with controlled lower",
+              "Peak volume; maintain full range eccentric; 2 min rest",
+              "Hardest week; keep the slow lowering; 2 min rest",
+              "Hardest week; go down slowly every time; rest 2 minutes"),
+    ], traits={"joint_action": "knee_flexion"}),
+    _ex("Isometric Adduction Squeeze", "full", False, [
+        _week("3 x 15 sec squeeze",
+              "Ball between knees; maximal squeeze; maintain breathing",
+              "Ball between knees; squeeze as hard as you can; keep breathing",
+              "Ball between your knees; squeeze hard; keep breathing"),
+        _week("3 x 20 sec squeeze",
+              "Longer hold; same maximal effort; do not let intensity drop",
+              "Hold for longer; squeeze just as hard the whole time",
+              "Hold for longer; keep squeezing hard"),
+        _week("4 x 15 sec squeeze",
+              "Extra set; same squeeze intensity; reset fully between sets",
+              "One more set; same hard squeeze; rest between sets",
+              "One more set; squeeze hard every time"),
+        _week("4 x 20 sec squeeze",
+              "Peak volume; maximal adductor recruitment throughout",
+              "Hardest week; squeeze hard the whole time",
+              "Hardest week; squeeze as hard as you can every time"),
+    ], traits={"joint_action": "hip_adduction"}),
+    # ── Hip extension exercises from EXERCISE_DATABASE ────────────────
+    # (Hip Thrust Partial Range ISO and Romanian Deadlift already above)
+    _ex("Reverse Hyperextension", "full", False, [
+        _week("3 x 10",
+              "Control the swing; squeeze glutes at top; 2 sec hold",
+              "Control the swing; squeeze at the top; hold 2 seconds",
+              "Control your legs; squeeze at the top; hold for 2 seconds"),
+        _week("3 x 12",
+              "More reps; same controlled tempo; do not use momentum",
+              "More reps; same speed; do not swing",
+              "More reps; keep it smooth; no swinging"),
+        _week("4 x 10",
+              "Extra set; maintain the hold at the top across all sets",
+              "One more set; keep the squeeze at the top every time",
+              "One more set; squeeze at the top every time"),
+        _week("4 x 10 + light load",
+              "Add load; same control and hold; 2 min rest",
+              "Add a little weight; same control and squeeze; 2 min rest",
+              "A bit of weight; keep it the same; rest 2 minutes"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Razorcurl", "bodyweight", False, [
+        _week("3 x 5 controlled eccentric",
+              "Slow descent; feel the glutes and hamstrings lengthen; push back up from the floor",
+              "Lower slowly; feel the stretch; push yourself back up",
+              "Go down slowly; feel the stretch; push yourself back up"),
+        _week("3 x 6 controlled eccentric",
+              "One more rep; same slow descent; maintain hip extension throughout",
+              "One more rep; same slow lowering; keep your hips forward",
+              "One more rep; go down slowly; keep your hips forward"),
+        _week("4 x 5 controlled eccentric",
+              "Extra set; same quality; this targets adductor magnus at length",
+              "One more set; same slow lowering; feel the inner thigh",
+              "One more set; go down slowly every time"),
+        _week("4 x 6 controlled eccentric",
+              "Peak volume; maintain full range eccentric; 90 sec rest",
+              "Hardest week; keep the slow lowering; rest 90 seconds",
+              "Hardest week; go down slowly every time; rest 90 seconds"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Reverse Lunge", "bodyweight", False, [
+        _week("3 x 8 each leg",
+              "Step back and drop the knee; drive up through the front heel; feel the hip extend",
+              "Step back; drop your knee; push up through your front foot",
+              "Step back; touch your knee down; push up with your front leg"),
+        _week("3 x 10 each leg",
+              "More reps; same depth and drive; maintain upright trunk",
+              "More reps; same depth; stay tall",
+              "More reps; go just as deep; stay tall"),
+        _week("4 x 8 each leg",
+              "Extra set; same quality; feel the glute loading at the bottom",
+              "One more set; same depth; feel your glute at the bottom",
+              "One more set; go deep every time"),
+        _week("4 x 10 each leg",
+              "Peak volume; maintain depth and trunk position throughout",
+              "Hardest week; keep the depth and stay tall",
+              "Hardest week; go deep and stay tall every time"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("90/90 Glute Bridge", "bodyweight", False, [
+        _week("3 x 10 with 2 sec hold at top",
+              "Feet on bench at 90/90; drive through heels; squeeze glutes at the top",
+              "Feet up at 90 degrees; push through your heels; squeeze at the top",
+              "Feet up on a bench; push through your heels; squeeze at the top"),
+        _week("3 x 12 with 2 sec hold at top",
+              "More reps; same hold and squeeze; do not rush the descent",
+              "More reps; same squeeze at the top; come down slowly",
+              "More reps; squeeze at the top; come down slowly"),
+        _week("4 x 10 with 3 sec hold at top",
+              "Extra set and longer hold; maintain glute engagement throughout",
+              "One more set; hold longer at the top; keep squeezing",
+              "One more set; hold longer at the top; keep squeezing"),
+        _week("4 x 12 with 3 sec hold at top",
+              "Peak volume; full squeeze and hold every rep; 90 sec rest",
+              "Hardest week; squeeze and hold every rep; rest 90 seconds",
+              "Hardest week; squeeze and hold every time; rest 90 seconds"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("High Step Up", "limited", False, [
+        _week("3 x 6 each leg",
+              "Full foot on box; drive through the heel; do not push off the back foot",
+              "Whole foot on the box; push through your heel; do not push off the floor",
+              "Whole foot on the box; push up with that leg only"),
+        _week("3 x 8 each leg",
+              "More reps; same drive pattern; maintain trunk position",
+              "More reps; same push; stay tall",
+              "More reps; push the same way; stay tall"),
+        _week("4 x 6 each leg",
+              "Extra set; same quality; this is unilateral hip extension under load",
+              "One more set; keep the same quality every rep",
+              "One more set; do every rep the same way"),
+        _week("4 x 8 each leg",
+              "Peak volume; maintain full range and drive; 90 sec rest",
+              "Hardest week; full range every rep; rest 90 seconds",
+              "Hardest week; go all the way up every time; rest 90 seconds"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Good Morning", "full", False, [
+        _week("3 x 8 @ light load",
+              "Hinge at the hips; bar across the back; maintain lumbar position throughout",
+              "Bend at the hips; bar on your back; keep your back straight",
+              "Bend at the hips; bar on your back; keep your back flat"),
+        _week("3 x 8 @ moderate load",
+              "Same hinge; increase load only if positions were solid in W1",
+              "Same movement; a little heavier; only if last week was clean",
+              "Same movement; a bit heavier; only if last week was good"),
+        _week("4 x 6 @ moderate load",
+              "Extra set; fewer reps; maintain hip hinge depth and lumbar position",
+              "One more set; fewer reps; keep the same depth and back position",
+              "One more set; fewer reps; keep going deep with a flat back"),
+        _week("4 x 6 @ moderate-heavy load",
+              "Peak load; 2 min rest; this is posterior chain loading at length",
+              "Heaviest week; 2 min rest; keep the back position",
+              "Heaviest week; rest 2 minutes; keep your back flat"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Hyperextension", "full", False, [
+        _week("3 x 10",
+              "Controlled segmental extension; drive from the glutes, not the lower back",
+              "Come up slowly; use your glutes, not your lower back",
+              "Come up slowly; squeeze your bum, not your back"),
+        _week("3 x 12",
+              "More reps; same glute-driven pattern; do not hyperextend the lumbar",
+              "More reps; same movement; do not arch your lower back",
+              "More reps; same movement; do not arch your back"),
+        _week("4 x 10",
+              "Extra set; maintain quality across all sets",
+              "One more set; keep it the same quality",
+              "One more set; do them all the same way"),
+        _week("4 x 12",
+              "Peak volume; maintain the glute drive throughout",
+              "Hardest week; keep using your glutes every rep",
+              "Hardest week; squeeze your bum every time"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Plantar Flexed Hamstring Bridge", "bodyweight", False, [
+        _week("3 x 8 each leg with 2 sec hold",
+              "Heels on floor, toes up; bridge and hold; feel the hamstrings and soleus engage",
+              "Heels on floor; bridge up and hold; feel the back of your legs",
+              "Heels on the floor; push up and hold; feel your legs working"),
+        _week("3 x 10 each leg with 2 sec hold",
+              "More reps; same plantar flexed position; maintain the hold",
+              "More reps; same foot position; hold at the top",
+              "More reps; same foot position; hold at the top"),
+        _week("4 x 8 each leg with 3 sec hold",
+              "Extra set and longer hold; feel the hamstring loading increase",
+              "One more set; hold longer; feel it more in the back of your legs",
+              "One more set; hold longer at the top"),
+        _week("4 x 10 each leg with 3 sec hold",
+              "Peak volume; maintain plantar flexed position and hold quality throughout",
+              "Hardest week; keep the foot position and hold every rep",
+              "Hardest week; hold at the top every time"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Single Leg Good Morning", "bodyweight", False, [
+        _week("3 x 6 each leg",
+              "Hinge on one leg; free leg extends behind; feel the stance glute and hamstring",
+              "Bend on one leg; other leg goes back; feel your standing leg working",
+              "Bend on one leg; other leg goes behind you; feel your standing leg"),
+        _week("3 x 8 each leg",
+              "More reps; same hinge depth; maintain balance and trunk position",
+              "More reps; same depth; keep your balance",
+              "More reps; go the same depth; try to balance"),
+        _week("4 x 6 each leg",
+              "Extra set; same quality; this is unilateral posterior chain control",
+              "One more set; same quality every rep",
+              "One more set; do them all the same way"),
+        _week("4 x 8 each leg",
+              "Peak volume; maintain depth and balance across all sets",
+              "Hardest week; keep the same depth and balance",
+              "Hardest week; go deep and balance every time"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("SL Hip Thrust", "limited", False, [
+        _week("3 x 8 each leg",
+              "Shoulders on bench; single leg drive; squeeze glute at top; control descent",
+              "Shoulders on bench; push up on one leg; squeeze at the top",
+              "Shoulders on the bench; push up with one leg; squeeze at the top"),
+        _week("3 x 10 each leg",
+              "More reps; same single leg drive and squeeze; maintain pelvic control",
+              "More reps; same push and squeeze; keep your hips level",
+              "More reps; push and squeeze; keep your hips straight"),
+        _week("4 x 8 each leg",
+              "Extra set; same quality; feel the abductors stabilise the hip",
+              "One more set; same quality; feel the side of your hip working too",
+              "One more set; do them the same way every time"),
+        _week("4 x 10 each leg",
+              "Peak volume; maintain full glute squeeze and pelvic control throughout",
+              "Hardest week; squeeze and hold every rep; keep hips level",
+              "Hardest week; squeeze every time; keep your hips straight"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("SL Bridge Variations", "bodyweight", False, [
+        _week("3 x 8 each leg",
+              "Bridge on one leg; move the free leg through raises and abductions; maintain bridge height",
+              "Bridge on one leg; move the free leg around; keep your hips up",
+              "Bridge on one leg; move your other leg; keep your hips up"),
+        _week("3 x 10 each leg",
+              "More reps; same bridge height; add contralateral leg abductions",
+              "More reps; keep your hips up; add leg movements",
+              "More reps; keep your hips high; move your free leg around"),
+        _week("4 x 8 each leg",
+              "Extra set; maintain quality; the free leg movements increase demand on the stance hip",
+              "One more set; keep your hips up the whole time",
+              "One more set; keep your hips high the whole time"),
+        _week("4 x 10 each leg",
+              "Peak volume; maintain bridge height and control throughout all sets",
+              "Hardest week; keep your hips up through every rep",
+              "Hardest week; keep your hips high every time"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Arabesque Rotations", "bodyweight", False, [
+        _week("3 x 6 each leg",
+              "Stand on one leg; hinge and rotate; feel the stance glute stabilise",
+              "Stand on one leg; lean forward and rotate; feel your standing leg",
+              "Stand on one leg; lean forward and turn; feel your standing leg working"),
+        _week("3 x 8 each leg",
+              "More reps; same depth and rotation; maintain balance throughout",
+              "More reps; same depth and turn; keep your balance",
+              "More reps; go the same depth; try to balance"),
+        _week("4 x 6 each leg",
+              "Extra set; same quality; the rotation creates 3D hip stability demand",
+              "One more set; same quality through every rep",
+              "One more set; do them all the same way"),
+        _week("4 x 8 each leg",
+              "Peak volume; maintain depth, rotation, and balance across all sets",
+              "Hardest week; keep the same depth and balance",
+              "Hardest week; go deep and balance every time"),
+    ], traits={"joint_action": "hip_extension"}),
+    _ex("Wall Bridge Circles", "bodyweight", False, [
+        _week("3 x 6 circles each direction each leg",
+              "Foot on wall; bridge and circle the free leg; maintain hip height and control",
+              "Foot on wall; bridge up and circle your free leg; keep hips up",
+              "Foot on the wall; push up and circle your other leg; keep your hips up"),
+        _week("3 x 8 circles each direction each leg",
+              "More reps; same circle quality; do not let the hip drop on each revolution",
+              "More reps; same circles; do not let your hips drop",
+              "More reps; same circles; keep your hips high"),
+        _week("4 x 6 circles each direction each leg",
+              "Extra set; same quality; the circles create 3D moments on the stance hip",
+              "One more set; keep the same quality every circle",
+              "One more set; do them all the same way"),
+        _week("4 x 8 circles each direction each leg",
+              "Peak volume; maintain hip height and circle quality throughout",
+              "Hardest week; keep your hips up through every circle",
+              "Hardest week; keep your hips high every time"),
+    ], traits={"joint_action": "hip_extension"}),
+]
+
+_FP_JUMPS = [
+    _ex("Loaded Box Jump (weighted vest)", "full", False, [
+        _week("4 x 4 @ bodyweight",
+              "Maximum height intent every rep; step down, full reset; do not rebound off the landing",
+              "Jump as high as you can every rep; step down and reset fully; no rebounding",
+              "Jump as high as you can every time; step back down and get ready again; no bouncing"),
+        _week("4 x 4 @ +5–10 kg vest",
+              "Same box, more load; intent is to jump higher than bodyweight, not simply match it",
+              "Same box height with a vest; try to jump just as high as without the vest",
+              "Same height box but with a heavy vest; try to jump just as high as before"),
+        _week("4 x 3 @ +10–15 kg vest",
+              "Fewer reps, higher intensity; full 3 min rest; the PAP effect from the squat is active here",
+              "Fewer reps, heavier vest; 3 min rest; the heavy squats have primed your legs for this",
+              "Fewer jumps, heavier vest; rest 3 minutes; your legs are warmed up from the squats"),
+        _week("5 x 3 @ +15–20 kg vest",
+              "Peak load; stop the set if height drops on rep 2; rest longer rather than grinding",
+              "Heaviest week; if your jump height drops, stop and rest more instead of pushing through",
+              "Heaviest vest; if you can't jump as high, stop and rest more"),
+    ], traits={"jump_type": "max_output"}),
+    _ex("Dumbbell-Loaded Jump Squat (light)", "limited", False, [
+        _week("4 x 5 @ light dumbbells",
+              "Drive the ground away as fast as possible; land balanced with soft knees; full reset between reps",
+              "Push the ground away as fast as you can; land soft with bent knees; reset between reps",
+              "Push the ground away fast; land softly with bendy knees; get ready again between each jump"),
+        _week("4 x 5 @ moderate dumbbells",
+              "Marginally heavier; speed of take-off must not drop; if it does, reduce load",
+              "A bit heavier; your take-off speed must stay the same or go back to lighter weights",
+              "A bit heavier; you must still be just as fast or go back to lighter weights"),
+        _week("5 x 4 @ moderate dumbbells",
+              "Extra set; fewer reps; maintain take-off speed across all sets",
+              "One more set; fewer reps; keep the same speed on every set",
+              "One more set; fewer reps; keep being fast on every set"),
+        _week("5 x 4 @ moderate-heavy dumbbells",
+              "Peak load; stop if take-off speed drops; the intent is always speed, not load",
+              "Heaviest week; stop if you slow down; speed always matters more than weight",
+              "Heaviest week; if you slow down, stop; being fast is more important than heavy"),
+    ]),
+    _ex("Tuck Jump (maximum height)", "bodyweight", False, [
+        _week("4 x 4",
+              "Maximum height intent; tight tuck; land softly and reset fully between reps",
+              "Jump as high as you can; tight tuck; land softly and reset between reps",
+              "Jump as high as you can; pull your knees up tight; land softly and get ready again"),
+        _week("4 x 5",
+              "One more rep per set; maintain height and tuck quality on every rep",
+              "One extra rep per set; keep the same height and tuck shape every time",
+              "One extra jump per set; keep jumping just as high with good shape"),
+        _week("5 x 5",
+              "Extra set; this is peak tuck jump volume; quality on rep 5 must match rep 1",
+              "One more set; the last rep of each set should look like the first",
+              "One more set; the last jump should look as good as the first"),
+        _week("5 x 4 with 2-sec pause before each jump",
+              "Pause and brace for 2 seconds before each jump; removes the stretch-shortening assistance; pure power",
+              "Pause and brace for 2 seconds before each jump; this makes you produce power from a dead stop",
+              "Stand still for 2 seconds before each jump; this makes it harder because you start from still"),
+    ]),
+    # --- Pogo variants ---
+    _ex("Stiff-Ankle Pogo Hops", "bodyweight", False, [
+        _week("3 x 15 reps",
+              "Ankle locked in slight dorsiflexion; contact time under 200 ms; think 'hot ground', not 'jump'",
+              "Lock your ankles; spend as little time on the ground as possible; think 'hot ground'",
+              "Keep your ankles stiff; get off the ground as fast as you can; pretend the ground is hot"),
+        _week("3 x 20 reps",
+              "Longer set, same stiffness; count contacts per set and beat last week's rate",
+              "Longer set; count how many contacts you get and try to beat last week",
+              "More reps; count your bounces and try to beat last week's number"),
+        _week("4 x 20 reps",
+              "Extra set; if the ankle collapses inward on any contact, reduce reps and reset the position",
+              "One more set; if your ankle wobbles on any hop, stop and fix your position",
+              "One more set; if your ankle wobbles, stop and fix your position before continuing"),
+        _week("4 x 25 reps",
+              "Peak volume; this mirrors the ankle stiffness demand at every bed contact in a full routine",
+              "Most reps yet; this is the same ankle stiffness you need at every trampoline contact",
+              "The most you have done; this is the same stiffness your ankles need on the trampoline"),
+    ], traits={"jump_type": "reactive"}),
+]
+
+_FP_BRACE = [
+    _ex("Hollow Body Hold", "bodyweight", False, [
+        _week("3 x 20 secs",
+              "Lower back pressed flat to the floor, ribs down, arms long overhead; stop the moment position breaks",
+              "Press your lower back flat to the floor, ribs pulled down, arms overhead; stop if your shape breaks",
+              "Press your back flat on the floor, pull your ribs down, arms up; stop if your shape goes wobbly"),
+        _week("3 x 25 secs",
+              "Hold longer; extend the arms further to increase the lever demand on the trunk",
+              "Longer hold; stretch your arms further overhead to make it harder",
+              "Hold for longer; reach your arms further to make it harder"),
+        _week("4 x 25 secs",
+              "Extra set; this is the shape the trunk must hold at every jump — there is no substitute for it",
+              "One more set; this is the exact body shape you need on every single jump",
+              "One more set; this is the exact shape your body needs on every single jump"),
+        _week("4 x 30 secs",
+              "Peak hold; no rocking, no breathing compensation; quality is the only metric here",
+              "Longest hold; no rocking; if the position breaks, the set is over",
+              "Longest hold; no rocking; if your shape breaks, the set is finished"),
+    ]),
+    _ex("Pallof Press (tall kneeling, anti-rotation)", "limited", False, [
+        _week("3 x 8 each side",
+              "Light band; press out and hold 1 sec; resist the band pulling you into rotation; hips square",
+              "Light band; press out and hold; don't let the band twist you; keep your hips square",
+              "Light band; push it out and hold; don't let it twist you; keep your hips straight"),
+        _week("3 x 10 each side",
+              "More reps or slightly heavier band; the trunk does not move, only the arms",
+              "More reps or heavier band; only your arms move, your body stays dead still",
+              "More reps or a harder band; only your arms move, your body stays totally still"),
+        _week("3 x 10 + 2-sec pause at extension",
+              "The pause raises demand without increasing load; trunk stiffness is force transfer",
+              "Hold it out for 2 seconds; this makes your trunk work harder without more weight",
+              "Hold it out for 2 seconds; this makes your body work harder without more weight"),
+        _week("4 x 10 + 2-sec pause",
+              "Extra set; the trunk stiffness here is the same stiffness required at maximum bed depression",
+              "One more set; this is the same stiffness your trunk needs when you hit the trampoline bed",
+              "One more set; this is the same tightness your body needs when you push into the trampoline"),
+    ]),
+    _ex("Suitcase Carry (single-arm)", "limited", False, [
+        _week("3 x 20 m each side",
+              "Tall spine, don't let the weight tilt you sideways; slow walk; feel the lateral trunk demand",
+              "Walk tall; don't let the weight tip you sideways; feel your trunk working to stay straight",
+              "Walk tall; don't lean to one side; feel your body working to stay straight"),
+        _week("3 x 25 m each side",
+              "Further distance; same load; longer exposure to the lateral demand",
+              "Walk further; same weight; feel how your trunk has to work for longer",
+              "Walk a bit further; same weight; your body has to stay straight for longer"),
+        _week("3 x 25 m + 10% more load",
+              "Heavier; notice how quickly trunk demand escalates with load",
+              "Heavier; notice how much harder it gets even with a small weight increase",
+              "A bit heavier; notice how much harder it is even with just a little more weight"),
+        _week("4 x 25 m + 10% more",
+              "Extra set; this trains the rigid transfer needed at every bed contact",
+              "One more set; this trains the side-body stiffness you need at every bed contact",
+              "One more set; this keeps your body strong on the sides for every trampoline bounce"),
+    ]),
+    # Bodyweight-only brace option
+    _ex("Side Plank with Hip Dip", "bodyweight", False, [
+        _week("3 x 8 each side",
+              "Lower the hip to the floor and drive it back up; control the frontal plane; no rotation",
+              "Lower your hip to the floor and push it back up; stay facing forward; no twisting",
+              "Lower your hip to touch the floor then push it back up; don't twist"),
+        _week("3 x 10 each side",
+              "More reps; maintain the controlled dip and drive; no rushing",
+              "More reps; keep each one slow and controlled; no rushing",
+              "More reps; keep going slow; don't rush"),
+        _week("4 x 10 each side",
+              "Extra set; frontal plane control under fatigue is the target here",
+              "One more set; keep the control even when your side body gets tired",
+              "One more set; keep going well even when it feels hard"),
+        _week("4 x 12 each side",
+              "Peak volume; this is lateral trunk stiffness under sustained demand",
+              "Most reps; this builds the side-body stiffness you need for trampoline",
+              "The most you have done; this makes your sides strong for the trampoline"),
+    ]),
+]
+
+_FP_OVERHEAD = [
+    _ex("Landmine Press (tall kneeling)", "full", False, [
+        _week("3 x 8 each side",
+              "Drive the bar from shoulder height to full overhead extension; no lumbar extension; brace before pressing",
+              "Press the bar from shoulder to overhead; don't arch your lower back; brace before you push",
+              "Push the bar up over your head; don't arch your back; get tight before you push"),
+        _week("3 x 10 each side",
+              "More reps; keep the pressing shoulder from hiking; feel the scapula upwardly rotating",
+              "More reps; don't shrug your shoulder; feel your shoulder blade moving as you press",
+              "More reps; don't shrug; feel your shoulder blade moving as you push"),
+        _week("3 x 10 + small load increase",
+              "Heavier; the arm path replicates the shoulder position at maximum arm depression on the trampoline",
+              "Heavier; this pressing path matches the shoulder position when your arms are overhead during a skill",
+              "A bit heavier; this is the same shoulder movement you use during skills on the trampoline"),
+        _week("4 x 8 each side + heavier",
+              "Extra set; peak overhead load; precision over power in this section",
+              "One more set at the heaviest weight; good positions matter more than heavy weight here",
+              "One more set at the heaviest weight; doing it well matters more than doing it heavy"),
+    ]),
+    _ex("Dumbbell Half-Kneeling Press", "limited", False, [
+        _week("3 x 8 each side",
+              "Half-kneeling; press the dumbbell to full lockout overhead; brace the trunk before pressing; no rib flare",
+              "Half-kneeling; press to full lockout; brace before pressing; don't let your ribs flare out",
+              "One knee down; push the weight straight up; get tight before pushing; don't stick your ribs out"),
+        _week("3 x 10 each side",
+              "More reps; if the lower back arches at lockout, the weight is too heavy",
+              "More reps; if your back arches at the top, go lighter",
+              "More reps; if your back bends when the weight is up, use a lighter one"),
+        _week("3 x 10 + heavier dumbbell",
+              "Increase load; maintain the brace and overhead position quality",
+              "Heavier weight; keep the same strong position",
+              "A bit heavier; keep doing it the same way"),
+        _week("4 x 8 each side + heavier",
+              "Extra set; peak overhead loading; position is everything in this exercise",
+              "One more set at the heaviest; position matters most",
+              "One more set; doing it well matters the most"),
+    ]),
+    _ex("Pike Push-Up (elevated feet)", "bodyweight", False, [
+        _week("3 x 8",
+              "Hands on the floor, feet elevated on a box; push through the overhead range; control the descent",
+              "Hands on the floor, feet up on a box; push up through the overhead position; control going down",
+              "Hands on the floor, feet up on a box; push up; go down slowly"),
+        _week("3 x 10",
+              "More reps; maintain range and control; head should nearly touch the floor each rep",
+              "More reps; go all the way down so your head nearly touches the floor each time",
+              "More reps; go down until your head nearly touches the floor"),
+        _week("4 x 8 with 2-sec pause at bottom",
+              "Add a pause at the bottom to build shoulder strength in the most demanding range",
+              "Hold at the bottom for 2 seconds; this builds shoulder strength where it is hardest",
+              "Hold at the bottom for 2 seconds; this makes your shoulders work harder"),
+        _week("4 x 10 with 2-sec pause",
+              "Peak volume; maintain the pause and full range across all sets",
+              "Most reps with the hold; keep the quality on every set",
+              "The most you have done with the hold; keep doing them well"),
+    ]),
+    # ── Overhead exercises from EXERCISE_DATABASE ─────────────────────
+    _ex("Piked Handstand Hold", "bodyweight", False, [
+        _week("3 x 15 sec hold",
+              "Piked position; push the floor away; active shoulders throughout; no sag",
+              "Piked position; push the floor away; keep your shoulders active",
+              "Piked position; push the floor; keep your shoulders working"),
+        _week("3 x 20 sec hold",
+              "Longer hold; same active shoulder position; maintain the push",
+              "Hold longer; keep pushing the floor; stay strong",
+              "Hold longer; keep pushing the floor away"),
+        _week("4 x 15 sec hold",
+              "Extra set; maintain shoulder elevation and trunk rigidity throughout",
+              "One more set; keep your shoulders pushed up and body tight",
+              "One more set; stay tight the whole time"),
+        _week("4 x 20 sec hold",
+              "Peak volume; maintain full shoulder push and position across all sets",
+              "Hardest week; stay strong and pushed up every set",
+              "Hardest week; push the floor away every time"),
+    ], traits={"joint_action": "overhead"}),
+    _ex("Handstand Hold", "bodyweight", False, [
+        _week("3 x 10 sec hold against wall",
+              "Full handstand; push through the floor; stack shoulders over wrists; ribs down",
+              "Full handstand against the wall; push the floor; shoulders over hands; ribs in",
+              "Handstand against the wall; push the floor; stay straight"),
+        _week("3 x 15 sec hold against wall",
+              "Longer hold; same stacked position; breathe and maintain",
+              "Hold longer; same position; keep breathing",
+              "Hold longer; stay straight; keep breathing"),
+        _week("4 x 10 sec hold against wall",
+              "Extra set; maintain full shoulder elevation and alignment",
+              "One more set; keep pushing up and staying straight",
+              "One more set; push up and stay straight"),
+        _week("4 x 15 sec hold against wall",
+              "Peak volume; full shoulder push and alignment across all sets",
+              "Hardest week; stay strong the whole time",
+              "Hardest week; push the floor and stay straight"),
+    ], traits={"joint_action": "overhead"}),
+    _ex("Handstand Shrugs", "bodyweight", False, [
+        _week("3 x 6 against wall",
+              "In handstand; shrug the shoulders up then release; control the motion; full elevation each rep",
+              "In handstand; push shoulders up then let them come down; control it",
+              "In handstand; push your shoulders up then let them down slowly"),
+        _week("3 x 8 against wall",
+              "More reps; same full range shrug; do not lose handstand position",
+              "More reps; same movement; stay in the handstand",
+              "More reps; keep doing the same movement"),
+        _week("4 x 6 against wall",
+              "Extra set; same quality; this builds scapular control under load",
+              "One more set; keep the quality every rep",
+              "One more set; do them all the same way"),
+        _week("4 x 8 against wall",
+              "Peak volume; maintain full elevation and control throughout",
+              "Hardest week; keep pushing up strong every rep",
+              "Hardest week; push up strongly every time"),
+    ], traits={"joint_action": "overhead"}),
+    _ex("Piked Handstand Taps", "bodyweight", False, [
+        _week("3 x 6 taps (3 each hand)",
+              "In piked handstand; lift one hand briefly; maintain shoulder position with the supporting arm",
+              "Piked handstand; lift one hand quickly; stay strong on the other arm",
+              "Piked handstand; lift one hand; stay strong on the other"),
+        _week("3 x 8 taps (4 each hand)",
+              "More reps; same brief lift; do not shift excessively to the support side",
+              "More reps; quick lift; do not lean too far to the other side",
+              "More reps; lift quickly; try not to lean"),
+        _week("4 x 6 taps (3 each hand)",
+              "Extra set; maintain minimal weight shift and shoulder control",
+              "One more set; keep the weight shift small",
+              "One more set; try not to lean when you lift"),
+        _week("4 x 8 taps (4 each hand)",
+              "Peak volume; controlled taps with minimal compensation throughout",
+              "Hardest week; keep the taps controlled every set",
+              "Hardest week; do them all carefully"),
+    ], traits={"joint_action": "overhead"}),
+    _ex("Open Handstand Hold", "bodyweight", False, [
+        _week("3 x 10 sec hold",
+              "Open shoulder angle; maintain overhead line; push through the floor; ribs controlled",
+              "Open shoulder position; push through the floor; keep ribs in",
+              "Open shoulders; push the floor; keep your body tight"),
+        _week("3 x 15 sec hold",
+              "Longer hold; same open position; maintain the push and alignment",
+              "Hold longer; same position; keep pushing",
+              "Hold longer; stay in the same position"),
+        _week("4 x 10 sec hold",
+              "Extra set; maintain open shoulder angle and full push throughout",
+              "One more set; keep the shoulders open and pushed up",
+              "One more set; keep pushing and stay open"),
+        _week("4 x 15 sec hold",
+              "Peak volume; maintain position quality across all sets",
+              "Hardest week; keep the same position every set",
+              "Hardest week; hold the same position every time"),
+    ], traits={"joint_action": "overhead"}),
+    _ex("Handstand Wall Walks", "bodyweight", False, [
+        _week("3 x 2 walks up and down",
+              "Walk hands toward the wall then back out; maintain shoulder push throughout the walk",
+              "Walk your hands to the wall then back out; keep pushing through your shoulders",
+              "Walk your hands to the wall and back; keep pushing the floor"),
+        _week("3 x 3 walks up and down",
+              "One more walk; same controlled pace; maintain shoulder elevation throughout",
+              "One more walk; same speed; keep your shoulders pushed up",
+              "One more walk; go the same speed; keep pushing up"),
+        _week("4 x 2 walks up and down",
+              "Extra set; same walk quality; do not rush; maintain control at the top",
+              "One more set; do not rush; stay controlled at the top",
+              "One more set; go slowly; stay controlled"),
+        _week("4 x 3 walks up and down",
+              "Peak volume; controlled walks with full shoulder push throughout",
+              "Hardest week; stay controlled and strong every walk",
+              "Hardest week; go slowly and push up every time"),
+    ], traits={"joint_action": "overhead"}),
+]
+
+# ── REPEATED POWER ──────────────────────────────────────────────────────
+
+_RP_JUMPS = [
+    _ex("Depth Drop to Immediate Rebound Jump", "limited", False, [
+        _week("3 x 5 from 30 cm",
+              "Step off, land stiff, rebound immediately; no squat on landing; contact time is the measure, not jump height",
+              "Step off the box, land stiff, bounce back up immediately; no squatting on landing; fast contact is the goal",
+              "Step off the box, land with stiff legs, bounce straight back up; don't squat; be fast off the ground"),
+        _week("3 x 5 from 40 cm",
+              "Higher drop, same ankle stiffness cue; feel the elastic return through the Achilles",
+              "Higher box; same stiff landing; feel the bounce-back through your calves and Achilles",
+              "Higher box; land the same way; feel the bounce coming from your calves"),
+        _week("4 x 5 from 40 cm",
+              "Extra set; this trains the elastic contribution that reduces active effort at each bed contact",
+              "One more set; this trains the elastic bounce-back your body uses at every trampoline contact",
+              "One more set; this is the same bounce-back your body uses on the trampoline"),
+        _week("4 x 5 from 50 cm",
+              "Highest drop; if the landing collapses into a squat, return to 40 cm and add a set instead",
+              "Highest box; if you squat on landing, go back to 40 cm and add an extra set instead",
+              "Highest box; if you squat when you land, go back to the smaller box and do more sets"),
+    ]),
+    _ex("Drop to Rebound (no box — step off low surface)", "bodyweight", False, [
+        _week("3 x 5 from 15 cm",
+              "Step off a low step; land stiff ankles; immediate rebound; focus on contact time, not height",
+              "Step off a low step; stiff ankles on landing; bounce back up immediately; be fast off the ground",
+              "Step off a low step; keep ankles stiff; bounce back up as fast as you can"),
+        _week("3 x 5 from 20 cm",
+              "Slightly higher; same stiff-ankle cue; the quality of the contact is the metric",
+              "A bit higher; same stiff ankles; how fast you leave the ground is the measure",
+              "A bit higher; same stiff ankles; try to be as fast off the ground as possible"),
+        _week("4 x 5 from 20 cm",
+              "Extra set; maintain contact quality across all sets",
+              "One more set; keep the contact quality the same through every set",
+              "One more set; keep being fast off the ground every time"),
+        _week("4 x 6 from 20 cm",
+              "More reps; this is the elastic contact pattern used at every bed contact",
+              "More reps; this is the same contact pattern you use on the trampoline",
+              "More reps; this is the same way your feet work on the trampoline"),
+    ]),
+    _ex("Alternating Leg Bounding (10 m runs)", "bodyweight", False, [
+        _week("3 x 4 bounds each leg",
+              "Drive behind the body at take-off, not under it; focus on hang time over horizontal speed",
+              "Push behind you at take-off, not underneath; aim for hang time, not speed",
+              "Push behind you when you take off; try to stay in the air as long as possible"),
+        _week("4 x 4 bounds each leg",
+              "Extra run; feel each leg contributing equally to height and distance",
+              "One more run; both legs should feel equally strong and powerful",
+              "One more run; both legs should feel the same"),
+        _week("4 x 5 bounds each leg",
+              "More contacts; trunk stays tall, no hip flexion at take-off",
+              "More bounds; stay tall; don't bend at the hips when you take off",
+              "More bounds; stay tall; don't bend forward when you jump"),
+        _week("4 x 5 @ maximum effort",
+              "Highest intent week; full 2 min rest; these should feel explosive, not loping",
+              "Maximum effort; full 2 min rest; every bound should feel explosive",
+              "Go as hard as you can; rest 2 minutes; every bound should be powerful"),
+    ]),
+    _ex("Continuous Pogo Hops — Maximum Contact Rate", "bodyweight", False, [
+        _week("4 x 10 secs",
+              "Ankle locked, maximum rate; count contacts per set and record them",
+              "Lock your ankles; hop as fast as you can; count your contacts per set",
+              "Keep your ankles stiff; hop as fast as possible; count how many you do"),
+        _week("4 x 12 secs",
+              "Slightly longer; if rate drops below W1, tighten ankle position before adding time",
+              "A bit longer; if your rate drops, fix your ankle position before going longer",
+              "A bit longer; if you slow down, fix your ankle position first"),
+        _week("5 x 12 secs",
+              "Extra set; note which set the rate drops — that is where ankle fatigue is limiting power output",
+              "One more set; notice which set you slow down — that's where your ankles get tired",
+              "One more set; notice when you start slowing down — that's when your ankles get tired"),
+        _week("5 x 15 secs",
+              "Peak volume; this directly mirrors the sustained ankle demand of a full 10-jump routine",
+              "Most volume yet; this is the same ankle demand as a full 10-jump trampoline routine",
+              "The most you have done; this is the same work your ankles do in a full trampoline routine"),
+    ]),
+]
+
+_RP_STRENGTH = [
+    _ex("Jump Squat (barbell or trap bar, light load)", "full", False, [
+        _week("4 x 5 @ 30% 1RM",
+              "Drive the ground away as fast as possible; land balanced, pause, full reset between reps",
+              "Push the ground away as fast as you can; land balanced and pause; reset between reps",
+              "Push the ground away as fast as you can; land balanced and stop; get ready again between jumps"),
+        _week("4 x 5 @ 35% 1RM",
+              "Marginally heavier; bar speed must not drop; if it does, reduce the load not the rest",
+              "A bit heavier; your speed must stay the same; if it drops, lower the weight",
+              "A bit heavier; you must still be just as fast; if not, use less weight"),
+        _week("5 x 5 @ 35–40% 1RM",
+              "Extra set; 2 min rest; power output maintained across all five sets is the metric",
+              "One more set; 2 min rest; keep the same power on every set",
+              "One more set; rest 2 minutes; keep being just as powerful on every set"),
+        _week("5 x 5 @ 40% 1RM",
+              "Peak week; stop the set if bar speed drops on rep 4 or 5; rest longer, do not grind",
+              "Heaviest week; stop if you slow down on rep 4 or 5; rest more, don't push through",
+              "Heaviest week; if you slow down, stop and rest more"),
+    ]),
+    _ex("Dumbbell Jump Squat", "limited", False, [
+        _week("4 x 5 @ light dumbbells",
+              "Hold dumbbells at sides; squat and explode upward; land soft, reset between reps",
+              "Hold dumbbells at your sides; squat and jump; land softly and reset",
+              "Hold weights at your sides; squat and jump; land softly and get ready again"),
+        _week("4 x 5 @ moderate dumbbells",
+              "Heavier; take-off speed is the metric, not load; if speed drops, reduce weight",
+              "Heavier; how fast you take off matters more than the weight",
+              "A bit heavier; being fast matters more than the weight"),
+        _week("5 x 4 @ moderate dumbbells",
+              "Extra set; fewer reps; maintain speed across all sets",
+              "One more set; fewer reps; keep the speed the same on every set",
+              "One more set; fewer jumps; keep being fast every time"),
+        _week("5 x 4 @ moderate-heavy",
+              "Peak load; speed is always the priority over load",
+              "Heaviest week; speed always comes first",
+              "Heaviest week; being fast is always the most important thing"),
+    ]),
+    _ex("Bodyweight Squat Jump (max height)", "bodyweight", False, [
+        _week("4 x 6",
+              "Full squat, maximum height jump, soft landing, full reset; every rep is a separate maximal effort",
+              "Full squat, jump as high as you can, land softly, reset; every jump is a maximum effort",
+              "Full squat, jump as high as you can, land softly, get ready again; every jump should be your best"),
+        _week("4 x 8",
+              "More reps; maintain height across all reps; if height drops on rep 7-8, note it",
+              "More reps; keep jumping the same height; notice if you drop off at the end",
+              "More reps; keep jumping the same height all the way through"),
+        _week("5 x 8",
+              "Extra set; peak volume; jump height on set 5 should match set 1",
+              "One more set; your jump height on the last set should match the first",
+              "One more set; jump just as high on the last set as the first"),
+        _week("5 x 6 with 3-sec pause at bottom",
+              "Pause in the squat for 3 seconds; removes elastic assistance; pure concentric power",
+              "Hold the bottom squat for 3 seconds before jumping; harder because you start from still",
+              "Hold at the bottom for 3 seconds before jumping; it's harder because you start from still"),
+    ]),
+    _ex("Seated Calf Raise (soleus, controlled tempo)", "full", False, [
+        _week("3 x 12 @ moderate load",
+              "2-sec up, 3-sec down; soleus is the primary base of sustained ankle stiffness across a routine",
+              "2 seconds up, 3 seconds down; soleus is the base of ankle stiffness for the whole routine",
+              "2 seconds going up, 3 seconds going down; this muscle keeps your ankle stiff for every jump"),
+        _week("3 x 12 @ +10% load",
+              "Same tempo and range; do not shorten the descent phase",
+              "Same speed; don't shorten the lowering part",
+              "Same speed; don't go down too fast"),
+        _week("4 x 10 @ +15%",
+              "Fewer reps, heavier; the eccentric phase is where soleus adaptation occurs",
+              "Fewer reps, heavier; the lowering part is the most important",
+              "Fewer reps but heavier; going down slowly is the most important part"),
+        _week("4 x 10 @ +20%",
+              "Peak soleus load; 90-sec rest minimum; this muscle sustains ankle power through a full routine",
+              "Heaviest week; rest 90 seconds; this muscle keeps your ankles powerful through a full routine",
+              "Heaviest week; rest for 90 seconds; this keeps your ankles strong through a whole routine"),
+    ]),
+    _ex("Single-Leg Calf Raise (slow tempo)", "bodyweight", False, [
+        _week("3 x 12 each leg",
+              "2-sec up, 3-sec down; full range; build the soleus endurance needed for repeated contacts",
+              "2 seconds up, 3 seconds down; full range; builds the ankle endurance for repeated contacts",
+              "2 seconds up, 3 seconds down; go all the way up and all the way down"),
+        _week("3 x 15 each leg",
+              "More reps; same tempo; the volume builds sustained ankle capacity",
+              "More reps; same speed; the extra reps build ankle endurance",
+              "More reps; same speed; this makes your ankles last longer"),
+        _week("4 x 12 each leg",
+              "Extra set; quality of range and tempo across all sets",
+              "One more set; same range and speed on every set",
+              "One more set; keep doing them the same way"),
+        _week("4 x 12 each leg with 4-sec eccentric",
+              "Slow the descent to 4 seconds; peak time under tension; soleus capacity peak",
+              "Go down for 4 seconds; hardest week; really builds the soleus",
+              "Go down really slowly for 4 seconds; the hardest week"),
+    ]),
+]
+
+_RP_BRACE = [
+    _ex("Hollow Body Rock (dynamic trunk stiffness)", "bodyweight", False, [
+        _week("3 x 8 rocks",
+              "Hold the hollow shape and rock forward and back; any shape change means the trunk leaked under movement",
+              "Hold the hollow shape and rock; if your shape changes at all, your trunk is leaking under movement",
+              "Hold the tight shape and rock; if your shape changes, your body is not stiff enough"),
+        _week("3 x 10 rocks",
+              "More reps; reach the arms overhead to extend the lever and increase trunk demand",
+              "More reps; reach your arms further overhead to make it harder",
+              "More reps; reach your arms further to make it harder"),
+        _week("4 x 10 rocks",
+              "Extra set; this rigid trunk under movement is the same stiffness the bed imposes at every contact",
+              "One more set; this is the same trunk stiffness the trampoline bed demands on every bounce",
+              "One more set; this is the same tightness your body needs on every trampoline bounce"),
+        _week("4 x 12 rocks",
+              "Peak volume; if position breaks before rep 12, the set ends — that is the standard",
+              "Most reps; if your shape breaks before 12, the set is over — that's the rule",
+              "The most reps; if your shape breaks before 12, stop — that's the rule"),
+    ]),
+    _ex("Dead Bug (contralateral, 4-sec lowering)", "bodyweight", False, [
+        _week("3 x 6 each side",
+              "4-sec lowering per rep; lower back stays flat against the floor throughout, no exceptions",
+              "Lower each limb for 4 seconds; your lower back must stay flat on the floor the entire time",
+              "Move your arm and leg slowly for 4 seconds; your back must stay flat on the floor the whole time"),
+        _week("3 x 8 each side",
+              "More reps; add a 1-sec pause at full limb extension before returning",
+              "More reps; pause for 1 second when your arm and leg are fully out before coming back",
+              "More reps; when your arm and leg are all the way out, hold for 1 second before coming back"),
+        _week("4 x 8 each side",
+              "Extra set; if the back arches before full extension, shorten the range and hold that position",
+              "One more set; if your back arches, don't go as far — hold the position where it's still flat",
+              "One more set; if your back lifts off the floor, don't go as far — stop where it stays flat"),
+        _week("4 x 10 each side",
+              "Highest volume; apply the same bracing intent you would use at maximum bed depression",
+              "Most reps; brace as hard as you would when hitting the trampoline bed",
+              "The most reps; hold your body as tight as you would on the trampoline"),
+    ]),
+]
+
+_RP_OVERHEAD = [
+    _ex("Single-Arm Overhead Carry", "limited", False, [
+        _week("3 x 20 m each side",
+              "Arm straight overhead, shoulder packed; the load tests scapular control under continuous movement",
+              "Arm straight up, shoulder pulled down and tight; this tests your shoulder control while you walk",
+              "Hold the weight straight up over your head; keep your shoulder strong while you walk"),
+        _week("3 x 25 m each side",
+              "Further distance; if the shoulder drifts forward, reduce load before increasing distance",
+              "Walk further; if your shoulder drifts forward, reduce the weight",
+              "Walk further; if your shoulder moves forward, use less weight"),
+        _week("3 x 25 m + 10% more load",
+              "Heavier; position replicates the shoulder demand at maximum arm reach in a trampoline skill",
+              "Heavier; this position matches the shoulder demand when your arms are fully extended during a skill",
+              "A bit heavier; this is the same shoulder position you use during skills"),
+        _week("4 x 25 m + 10% more",
+              "Extra set; overhead stability under load is underdeveloped in most gymnasts",
+              "One more set; overhead shoulder strength is underdeveloped in most gymnasts",
+              "One more set; strong shoulders overhead is really important for gymnasts"),
+    ]),
+    _ex("Overhead Wall Hold (bodyweight isometric)", "bodyweight", False, [
+        _week("3 x 20 secs",
+              "Stand facing the wall; arms overhead, palms flat against the wall; press and hold; brace the trunk",
+              "Face the wall; press your hands overhead against the wall and hold; keep your trunk tight",
+              "Face the wall; press your hands up against the wall and hold; keep your tummy tight"),
+        _week("3 x 25 secs",
+              "Longer hold; maintain the press force throughout; no sagging",
+              "Longer hold; keep pressing the whole time; don't let your arms relax",
+              "Hold for longer; keep pressing the whole time; don't relax"),
+        _week("4 x 25 secs",
+              "Extra set; this builds the overhead endurance needed for repeated skills",
+              "One more set; this builds the shoulder endurance for repeated skills",
+              "One more set; this makes your shoulders last through lots of skills"),
+        _week("4 x 30 secs",
+              "Peak hold; maintain press intensity across all four sets",
+              "Longest hold; keep pressing just as hard on every set",
+              "Longest hold; keep pressing hard every time"),
+    ]),
+]
+
+# ── INJURY RESILIENCE ───────────────────────────────────────────────────
+
+_IR_OVERHEAD = [
+    _ex("Y/T/W Raise (prone on bench)", "limited", False, [
+        _week("3 x 10 each position",
+              "Light or no load; Y = arms overhead, T = arms horizontal, W = elbows at 90°; scapulae retract and depress on every rep",
+              "Light or no weight; Y = arms up, T = arms out, W = elbows bent; pull your shoulder blades back and down on every rep",
+              "Light or no weight; three shapes — arms up (Y), arms out (T), elbows bent (W); squeeze your shoulder blades on every rep"),
+        _week("3 x 12 each position",
+              "More reps; add 1–2 kg plates only if every position was clean in W1",
+              "More reps; add light weights only if last week's positions were clean",
+              "More reps; only add a small weight if last week was done well"),
+        _week("4 x 10 + 2 kg each",
+              "Extra set; these positions reflect the shoulder demand at maximum depression on the trampoline",
+              "One more set with weights; these are the shoulder positions used at maximum trampoline depression",
+              "One more set with weights; these are the shoulder positions your body uses on the trampoline"),
+        _week("4 x 12 + 2–3 kg",
+              "Peak dose; slow and deliberate; rushing this exercise removes the benefit entirely",
+              "Most reps at the heaviest weight; go slow; rushing removes all the benefit",
+              "The most reps; go really slow; rushing makes the exercise useless"),
+    ]),
+    _ex("Y/T/W Raise (standing with band)", "bodyweight", False, [
+        _week("3 x 10 each position",
+              "Light band; Y = arms overhead, T = arms horizontal, W = elbows at 90°; scapulae retract and depress on every rep",
+              "Light band; Y arms up, T arms out, W elbows bent; pull shoulder blades back and down each rep",
+              "Light band; three shapes — up (Y), out (T), elbows bent (W); squeeze shoulder blades every time"),
+        _week("3 x 12 each position",
+              "More reps; heavier band only if positions were clean; quality over resistance",
+              "More reps; only use a heavier band if last week was done well",
+              "More reps; only use a harder band if last week was good"),
+        _week("4 x 10 each + heavier band",
+              "Extra set; these are the scapular positions required at maximum bed depression",
+              "One more set with harder band; these shoulder positions match the trampoline demand",
+              "One more set with a harder band; these shoulder shapes are what the trampoline needs"),
+        _week("4 x 12 each + heavier band",
+              "Peak dose; slow and controlled; no momentum",
+              "Most reps; slow and controlled; don't swing",
+              "The most reps; go slow and controlled; don't swing"),
+    ]),
+    _ex("Serratus Push-Up (scapular focus)", "bodyweight", False, [
+        _week("3 x 8",
+              "At the top of a push-up, protract the scapulae further; hold 2 secs at full protraction",
+              "At the top of a push-up, push further through your shoulder blades; hold 2 secs at the top",
+              "At the top of a push-up, push your shoulders as far forward as you can; hold for 2 seconds"),
+        _week("3 x 10",
+              "More reps; feel the serratus pulling the scapula around the ribcage",
+              "More reps; feel the muscle under your armpit pulling your shoulder blade around",
+              "More reps; feel the muscle under your arm working as you push"),
+        _week("4 x 10",
+              "Extra set; serratus weakness presents as winging in overhead positions",
+              "One more set; weak serratus shows as shoulder blade winging when arms are overhead",
+              "One more set; this muscle stops your shoulder blades sticking out"),
+        _week("4 x 12",
+              "Peak dose; this muscle is underloaded in most gymnastics conditioning but critical for overhead control",
+              "Most reps; this is one of the most important and most neglected shoulder muscles in gymnastics",
+              "The most reps; this muscle is really important for gymnasts but most don't train it enough"),
+    ]),
+]
+
+_IR_STRENGTH = [
+    _ex("Slow Eccentric Step Down (single leg)", "limited", True, [
+        _week("3 x 8 each leg",
+              "5-sec lowering off a 20 cm step; knee tracks over the 2nd toe throughout, no inward drift",
+              "5 seconds going down off a step; keep your knee pointing over your 2nd toe; no wobbling inward",
+              "Go down really slowly off a step for 5 seconds; keep your knee pointing over your toes; don't wobble"),
+        _week("3 x 10 each leg",
+              "More reps, same 5-sec tempo; add a 10 kg vest if the descent felt controlled",
+              "More reps; same slow speed; add a weighted vest if it felt easy last week",
+              "More reps; same slow speed; add a vest with weight if last week was easy"),
+        _week("4 x 8 each leg + 10 kg vest",
+              "Extra set; eccentric overload is the primary patellar tendon stimulus",
+              "One more set with the vest; the slow lowering is the main stimulus for the knee tendon",
+              "One more set with the vest; going down slowly is what makes your knee tendon stronger"),
+        _week("4 x 10 each leg + 10–15 kg",
+              "Highest dose; directly replicates the single-leg loading pattern of a trampoline landing",
+              "Most reps at the heaviest; this directly matches how your knee loads when landing on one leg",
+              "The most reps with the most weight; this is the same force your knee takes when you land"),
+    ]),
+    _ex("Bodyweight Eccentric Step Down (single leg)", "bodyweight", True, [
+        _week("3 x 8 each leg",
+              "5-sec lowering off a 15–20 cm step; knee tracks over the 2nd toe; control the full descent",
+              "5 seconds going down off a step; keep your knee over your 2nd toe; control the whole way down",
+              "Go down slowly for 5 seconds off a step; keep your knee over your toes; go slow all the way"),
+        _week("3 x 10 each leg",
+              "More reps; same tempo; if the knee drifts inward, reduce the range before adding reps",
+              "More reps; same slow speed; if your knee wobbles inward, go less deep before adding reps",
+              "More reps; same slow speed; if your knee wobbles, don't go as far down"),
+        _week("4 x 10 each leg",
+              "Extra set; this is the foundational knee tendon dose at bodyweight",
+              "One more set; this is the basic knee tendon strengthening dose",
+              "One more set; this is the basic exercise for making your knee stronger"),
+        _week("4 x 10 each leg with 6-sec eccentric",
+              "Slowest descent yet; peak time under tension; each rep should feel deliberately slow",
+              "Slowest yet; 6 seconds down; every rep should feel deliberately slow",
+              "The slowest yet; go down for 6 seconds; every rep should be really really slow"),
+    ]),
+    _ex("Slow Eccentric Calf Raise — Achilles Loading", "limited", True, [
+        _week("3 x 8 each leg",
+              "6-sec lowering on single leg, two-leg rise; this is the gold-standard Achilles tendon stimulus",
+              "6 seconds going down on one leg, push up with two; this is the best exercise for your Achilles tendon",
+              "Go down on one leg for 6 seconds, then push up with both legs; this makes your Achilles really strong"),
+        _week("3 x 10 each leg",
+              "More reps; add 5–10 kg in a rucksack if bodyweight has become easy",
+              "More reps; add weight in a bag on your back if bodyweight is easy",
+              "More reps; put some weight in a bag on your back if it's too easy"),
+        _week("4 x 10 each leg + 10–15 kg",
+              "Extra set; the 6-sec descent is non-negotiable — do not rush it",
+              "One more set with weight; the 6-second lowering is non-negotiable — don't rush it",
+              "One more set with weight; you must go down for 6 seconds — don't rush"),
+        _week("4 x 12 each leg + 15–20 kg",
+              "Peak dose; 2 min rest; Achilles adaptation is slow, consistency matters more than load",
+              "Most reps at heaviest; 2 min rest; Achilles tendons adapt slowly — being consistent matters more than heavy",
+              "The most reps with the most weight; rest 2 minutes; doing this every week matters more than going heavy"),
+    ]),
+    _ex("Bodyweight Eccentric Calf Raise", "bodyweight", True, [
+        _week("3 x 10 each leg",
+              "6-sec lowering on single leg off a step; two-leg rise; full range at the bottom stretch",
+              "6 seconds going down on one leg off a step; push up with both; go all the way down",
+              "Go down on one leg for 6 seconds off a step; push up with both legs; go all the way down"),
+        _week("3 x 12 each leg",
+              "More reps; same 6-sec tempo; the consistency of the descent is the stimulus",
+              "More reps; same 6-second lowering; being consistent is the most important thing",
+              "More reps; same slow speed going down; keeping the same speed matters the most"),
+        _week("4 x 12 each leg",
+              "Extra set; maintain tempo across all four sets",
+              "One more set; same speed on every set",
+              "One more set; keep the same speed every time"),
+        _week("4 x 12 each leg with 8-sec eccentric",
+              "Slowest descent; peak tendon stimulus at bodyweight; patience is the exercise",
+              "Slowest yet; 8 seconds down; this is the peak challenge at bodyweight",
+              "The slowest yet; 8 seconds going down; be really patient"),
+    ]),
+]
+
+_IR_BRACE = [
+    _ex("Copenhagen Plank (adductor and lateral trunk chain)", "bodyweight", False, [
+        _week("3 x 20 secs each side",
+              "Top leg on bench, bottom leg hanging; hips level, no rotation",
+              "Top leg on a bench, bottom leg hanging; keep your hips level; don't twist",
+              "Top leg on a bench, bottom leg hanging; keep your hips flat; don't twist"),
+        _week("3 x 25 secs each side",
+              "Longer hold; the lateral chain is the underloaded stabiliser at every bed contact",
+              "Longer hold; this builds the side-body that stabilises you at every trampoline contact",
+              "Hold for longer; this makes the sides of your body strong for every bounce"),
+        _week("4 x 25 secs each side",
+              "Extra set; if hips drop before time is up, note which side and flag to the coach",
+              "One more set; if your hips drop early, note which side and tell your coach",
+              "One more set; if your hips drop, remember which side and tell your coach"),
+        _week("4 x 30 secs each side",
+              "Peak hold; lateral chain strength directly reduces hip and groin injury risk in gymnastics",
+              "Longest hold; this directly reduces the chance of hip and groin injuries",
+              "Longest hold; this helps protect your hips from getting hurt"),
+    ]),
+    _ex("Ab Wheel Rollout (anti-extension, progressive range)", "limited", False, [
+        _week("3 x 6 from knees",
+              "Rollout until the lower back begins to arch, then stop; that point is your current safe range",
+              "Roll out until your lower back starts to arch, then stop; that's your current safe range",
+              "Roll out until your back starts to bend, then stop; that's as far as you should go"),
+        _week("3 x 8 from knees",
+              "Slightly more range if the back stayed neutral in W1; never progress range at the cost of position",
+              "Go a bit further if your back stayed flat last week; never go further if your back arches",
+              "Go a bit further if your back was flat last week; never go further if your back bends"),
+        _week("3 x 10 from knees",
+              "More reps at controlled range; this is more effective than rushing to a standing rollout",
+              "More reps at the same range; this is more effective than trying to do it from standing",
+              "More reps at the same range; this is better than trying to do it standing up"),
+        _week("4 x 8 from toes if controlled, or 4 x 10 from knees",
+              "Progress the base of support, not just the repetition count",
+              "Try from your toes if you can keep your back flat; otherwise stay on your knees",
+              "Try from your toes if your back stays flat; if not, stay on your knees and do more reps"),
+    ]),
+    _ex("Plank Rollout (bodyweight, towel on smooth floor)", "bodyweight", False, [
+        _week("3 x 6",
+              "Hands on a towel on a smooth floor; slide forward into a plank rollout; stop before the lower back arches",
+              "Hands on a towel; slide forward; stop before your lower back arches",
+              "Hands on a towel; slide forward slowly; stop before your back starts to bend"),
+        _week("3 x 8",
+              "More reps; same controlled range; the back must stay flat throughout",
+              "More reps; same range; your back must stay flat the whole time",
+              "More reps; same distance; your back must stay flat"),
+        _week("4 x 8",
+              "Extra set; maintain the same range across all four sets",
+              "One more set; same range on every set",
+              "One more set; go the same distance every time"),
+        _week("4 x 10",
+              "Peak volume at bodyweight; position quality across all reps and sets is the standard",
+              "Most reps; the quality of your position on every rep is the standard",
+              "The most reps; keep your position perfect every time"),
+    ]),
+    _ex("Side-Lying Hip Abduction with Band (glute med capacity)", "limited", False, [
+        _week("3 x 12 each side",
+              "Light band; slow and deliberate; feel the glute contracting, not the hip flexor substituting",
+              "Light band; slow and controlled; feel the side of your glute working, not your hip flexor",
+              "Light band; go slow; feel the muscle on the side of your hip working"),
+        _week("3 x 15 each side",
+              "More reps; upgrade band resistance if 12 reps felt easy",
+              "More reps; use a harder band if 12 was easy",
+              "More reps; use a harder band if 12 was easy last week"),
+        _week("4 x 15 + heavier band",
+              "Extra set; glute med failure at landing is a primary mechanism for knee injury in gymnastics",
+              "One more set with harder band; glute med weakness is a major cause of knee injuries in gymnastics",
+              "One more set with a harder band; this muscle protects your knees when you land"),
+        _week("4 x 15 + 2-sec hold at top",
+              "Isometric component adds resilience at the glute med tendon insertion; slow the return",
+              "Hold at the top for 2 seconds; this builds extra strength in the tendon; lower slowly",
+              "Hold at the top for 2 seconds; this makes the muscle even stronger; go down slowly"),
+    ]),
+    _ex("Bodyweight Side-Lying Hip Abduction (no band)", "bodyweight", False, [
+        _week("3 x 15 each side",
+              "Slow and deliberate; top leg lifts while bottom leg stays anchored; feel the glute med, not the hip flexor",
+              "Slow and controlled; lift the top leg while the bottom stays still; feel the side of your hip working",
+              "Go slow; lift the top leg while the bottom stays still; feel the side of your hip"),
+        _week("3 x 20 each side",
+              "More reps; maintain the slow tempo; quality over quantity",
+              "More reps; keep going slow; quality matters more than reps",
+              "More reps; keep going slow; doing them well matters more"),
+        _week("4 x 20 each side",
+              "Extra set; this is significant volume at bodyweight; don't rush",
+              "One more set; lots of reps; keep the quality up",
+              "One more set; lots of reps; keep doing them well"),
+        _week("4 x 15 + 3-sec hold at top",
+              "Add an isometric hold at the top; peak challenge at bodyweight; lower under control",
+              "Hold at the top for 3 seconds; this is the hardest version at bodyweight",
+              "Hold at the top for 3 seconds; this is the hardest one without a band"),
+    ]),
+]
+
+_IR_JUMPS = [
+    _ex("Controlled Depth Drop to Soft Landing", "limited", False, [
+        _week("3 x 5 from 20 cm",
+              "Step off, absorb through hip, knee, and ankle; no rebound; landing quality is the only focus",
+              "Step off the box; absorb the landing through your whole body; no bouncing back up; focus only on the landing",
+              "Step off the box; land softly using your whole body; don't bounce; just land as nicely as you can"),
+        _week("3 x 5 from 30 cm",
+              "Higher drop, same soft-landing intent; note which joint takes the most load and flag any discomfort",
+              "Higher box; same soft landing; notice which part of your body feels the most load",
+              "Higher box; land the same soft way; notice where you feel it the most"),
+        _week("4 x 5 from 30 cm",
+              "Extra set; this is tissue exposure at low intensity, not a performance exercise",
+              "One more set; this is about letting your body feel the landing, not about jumping high",
+              "One more set; this is about practising good landings, not about jumping"),
+        _week("4 x 5 from 40 cm",
+              "Peak drop height; if landing mechanics deteriorate, return to 30 cm; quality over height",
+              "Highest box; if your landing gets worse, go back to the smaller box; quality matters more",
+              "Highest box; if you can't land well, go back to the smaller box"),
+    ]),
+    _ex("Step Down to Soft Single-Leg Landing", "bodyweight", False, [
+        _week("3 x 6 each leg from 15 cm",
+              "Step down off a low step to a single-leg landing; absorb slowly; 3-sec controlled descent to the floor",
+              "Step down from a low step to one leg; absorb slowly; take 3 seconds to control it",
+              "Step down from a low step to one leg; land softly; take 3 seconds to get to the bottom"),
+        _week("3 x 8 each leg from 15 cm",
+              "More reps; same controlled descent; note any difference between left and right",
+              "More reps; same slow control; notice if one leg is easier than the other",
+              "More reps; same slow control; notice if one leg is different"),
+        _week("4 x 8 each leg from 20 cm",
+              "Extra set and slightly higher step; the controlled descent trains landing capacity",
+              "One more set from a bit higher; the slow landing trains your body to handle more",
+              "One more set from a bit higher; the slow landing makes your legs stronger"),
+        _week("4 x 8 each leg from 20 cm + eyes closed",
+              "Eyes closed adds proprioceptive demand; only attempt if open-eye quality was solid",
+              "Close your eyes for extra challenge; only do this if it was solid with eyes open",
+              "Try it with your eyes closed; only do this if you were good with eyes open"),
+    ]),
+]
+
+# ── BONUS EXERCISES (added when limiting factor bias applies) ────────────
+
+_BONUS_EXERCISES = {
+    "jumps": _ex("Broad Jump (standing)", "bodyweight", False, [
+        _week("3 x 5",
+              "Drive forward and upward from a stand; land balanced; full reset between reps",
+              "Jump forward and up from standing; land balanced; reset between reps",
+              "Jump forward from standing; land steady; get ready between each jump"),
+        _week("3 x 6",
+              "One more rep; same quality; measure your distance if possible",
+              "One more rep; same quality; see how far you can go",
+              "One more rep; try to jump a bit further each week"),
+        _week("4 x 5",
+              "Extra set; maintain distance across all four sets",
+              "One more set; try to jump the same distance on every set",
+              "One more set; try to jump the same distance every time"),
+        _week("4 x 6",
+              "Peak volume; intent on every rep; this is a full-body power expression",
+              "Most reps; give full effort on every jump; this uses your whole body",
+              "The most reps; try your hardest on every jump"),
+    ]),
+    "overhead": _ex("Band Pull-Apart (shoulder health)", "limited", False, [
+        _week("3 x 15",
+              "Pull the band apart at chest height; squeeze the shoulder blades together; hold 1 sec at full pull",
+              "Pull the band apart at chest height; squeeze your shoulder blades; hold 1 second",
+              "Pull the band apart at your chest; squeeze your shoulder blades together; hold for 1 second"),
+        _week("3 x 20",
+              "More reps; same quality; don't rush the pull or the return",
+              "More reps; don't rush; control the pull and the return",
+              "More reps; don't rush; go slow both ways"),
+        _week("4 x 15 + heavier band",
+              "Extra set; heavier band; maintain the squeeze at the end of each rep",
+              "One more set with a harder band; keep the squeeze on every rep",
+              "One more set with a harder band; keep squeezing every time"),
+        _week("4 x 20 + heavier band",
+              "Peak dose; this is posterior shoulder and retraction capacity",
+              "Most reps at the hardest band; great for shoulder health",
+              "The most reps with the hardest band; great for your shoulders"),
+    ]),
+    "brace": _ex("RKC Plank (maximum contraction)", "bodyweight", False, [
+        _week("3 x 15 secs",
+              "Maximum contraction of every muscle; squeeze glutes, quads, fists, pull elbows to toes; nothing relaxed",
+              "Squeeze everything — glutes, quads, fists, elbows pulling toward your toes; nothing relaxed",
+              "Squeeze everything as hard as you can — bum, legs, hands; pull elbows toward your toes; super tight"),
+        _week("3 x 20 secs",
+              "Longer hold; maintain the maximal contraction throughout; if anything relaxes, restart the intent",
+              "Longer hold; keep squeezing everything the whole time; if you relax, restart the squeeze",
+              "Hold for longer; keep squeezing everything; if you relax, squeeze again"),
+        _week("4 x 20 secs",
+              "Extra set; this is total trunk co-contraction — the most direct brace training available",
+              "One more set; this is the most direct trunk stiffness exercise you can do",
+              "One more set; this is the best exercise for making your whole body stiff and strong"),
+        _week("4 x 25 secs",
+              "Peak hold; maintain maximal intent; this intensity is what the bed demands at every contact",
+              "Longest hold; keep the maximum squeeze; this is the stiffness the trampoline demands",
+              "Longest hold; squeeze as hard as you can; this is the tightness the trampoline needs"),
+    ]),
+    "strength": _ex("Spanish Squat Hold (isometric)", "limited", False, [
+        _week("3 x 30 secs",
+              "Strap around a post holds hips back; knees at ~60°; direct quad tension without knee compression",
+              "Strap or post holds your hips back; knees at 60°; feel the quads working without knee pressure",
+              "Use a strap to hold your hips back; bend your knees; feel your thigh muscles working hard"),
+        _week("3 x 35 secs",
+              "Longer hold; this angle is where the patellar tendon is most commonly loaded in jumpers",
+              "Longer hold; this angle matches where jumpers' knee tendons work hardest",
+              "Hold for longer; this is the angle where your knee works hardest when jumping"),
+        _week("4 x 35 secs",
+              "Extra set; note if one quad fatigues faster than the other — flag to coach",
+              "One more set; notice if one leg gets tired faster — tell your coach",
+              "One more set; notice if one leg gets tired faster — tell your coach"),
+        _week("4 x 45 secs",
+              "Peak isometric dose; controlled breathing; maintain consistent quad tension throughout",
+              "Longest hold; breathe normally; keep the same tension in your quads throughout",
+              "Longest hold; keep breathing; keep squeezing your legs the whole time"),
+    ]),
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ASSEMBLED EXERCISE LIBRARY
+# ═══════════════════════════════════════════════════════════════════════════
+
+EXERCISE_LIBRARY = {
+    "force production": {
+        "strength": _FP_STRENGTH,
+        "jumps": _FP_JUMPS,
+        "brace": _FP_BRACE,
+        "overhead": _FP_OVERHEAD,
+    },
+    "repeated power": {
+        "jumps": _RP_JUMPS,
+        "strength": _RP_STRENGTH,
+        "brace": _RP_BRACE,
+        "overhead": _RP_OVERHEAD,
+    },
+    "injury resilience": {
+        "overhead": _IR_OVERHEAD,
+        "strength": _IR_STRENGTH,
+        "brace": _IR_BRACE,
+        "jumps": _IR_JUMPS,
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WARM-UP
+# ═══════════════════════════════════════════════════════════════════════════
+
+WARMUP = {
+    "full": [
+        {"prescription": "3 min easy skipping or light jog",
+         "cue": {"senior": "Build ankle rhythm before any loading",
+                 "youth": "Get your ankles moving and warm before any loading",
+                 "junior": "Get your body warm and your ankles moving"}},
+        {"prescription": "Tibialis raises x 15",
+         "cue": {"senior": "Stand tall, lift toes to shin, hold 1 sec at top",
+                 "youth": "Stand tall, lift your toes toward your shin, hold 1 second at the top",
+                 "junior": "Stand tall and lift your toes up; hold at the top for 1 second"}},
+        {"prescription": "Ankle circles x 10 each direction per foot",
+         "cue": {"senior": "Full range, not a token rotation",
+                 "youth": "Full circles, not little wobbles",
+                 "junior": "Big full circles with your ankles"}},
+        {"prescription": "Mini-band lateral walk x 10 steps each direction",
+         "cue": {"senior": "Wake the glute med before it is needed",
+                 "youth": "Switch on the side-hip muscles before they are needed",
+                 "junior": "Wake up the muscles on the sides of your hips"}},
+        {"prescription": "Terminal knee extension with band x 15 each leg",
+         "cue": {"senior": "Quad activation at end range",
+                 "youth": "Squeeze the front of your thigh at full extension",
+                 "junior": "Straighten your leg all the way and squeeze the front of your thigh"}},
+        {"prescription": "Hollow body hold x 3 x 10 secs",
+         "cue": {"senior": "Establish the trunk position required on every jump",
+                 "youth": "Find the tight body position you need on every jump",
+                 "junior": "Get into the tight shape your body needs on every jump"}},
+        {"prescription": "3 practice tuck jumps at low height",
+         "cue": {"senior": "Focus on the brace and landing, not the height",
+                 "youth": "Focus on bracing and landing well, not jumping high",
+                 "junior": "Focus on landing well, not on jumping high"}},
+    ],
+    "short": [
+        {"prescription": "2 min easy skipping",
+         "cue": {"senior": "Ankle rhythm and general warm-up",
+                 "youth": "Get your ankles warm and moving",
+                 "junior": "Get warm and get your ankles moving"}},
+        {"prescription": "Ankle circles x 10 each direction",
+         "cue": {"senior": "Full range both directions",
+                 "youth": "Full circles both ways",
+                 "junior": "Big circles with your ankles both ways"}},
+        {"prescription": "Hollow body hold x 2 x 10 secs",
+         "cue": {"senior": "Establish the trunk position",
+                 "youth": "Find the tight body shape",
+                 "junior": "Get into the tight shape"}},
+    ],
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# COOL-DOWN
+# ═══════════════════════════════════════════════════════════════════════════
+
+COOLDOWN = [
+    "Straight-leg calf stretch against wall – 45 secs each leg (gastrocnemius)",
+    "Bent-knee calf stretch against wall – 45 secs each leg (soleus)",
+    "Standing quad stretch – 30 secs each leg",
+    "Kneeling hip flexor stretch – 30 secs each side",
+    "Seated hamstring stretch – 30 secs each leg",
+    "Hollow body breathing – 60 secs; breathe normally whilst holding the position",
+]
+
+COOLDOWN_SHORT = [
+    "Calf stretch against wall – 30 secs each leg",
+    "Standing quad stretch – 20 secs each leg",
+    "Hollow body breathing – 30 secs",
+]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MICRODOSE SESSIONS
+# Tiered by athlete level: beginner (3 exercises), intermediate (4), advanced (5)
+# ═══════════════════════════════════════════════════════════════════════════
+
+MICRODOSE_SESSIONS = {
+    "ankle": {
+        "label": "ANKLE — Achilles, soleus, and tibialis capacity",
+        "beginner": [
+            {"prescription": "Single-leg calf raise x 10 each leg (slow)",
+             "cue": {"senior": "Full range, 3-sec lowering; Achilles maintenance",
+                     "youth": "Full range, go down for 3 seconds; keeps your Achilles healthy",
+                     "junior": "Go all the way up and down slowly; keeps your ankles healthy"}},
+            {"prescription": "Tibialis raise x 12 against wall",
+             "cue": {"senior": "Lift toes toward shin; hold 1 sec; anterior shin balance",
+                     "youth": "Lift toes toward your shin; hold 1 second at the top",
+                     "junior": "Lift your toes up and hold for 1 second"}},
+            {"prescription": "Ankle circles x 10 each direction each foot",
+             "cue": {"senior": "Full range; mobility maintenance",
+                     "youth": "Big full circles to keep your ankles mobile",
+                     "junior": "Big circles with your ankles"}},
+        ],
+        "intermediate": [
+            {"prescription": "Slow eccentric calf raise – 3 x 8 each leg, 6-sec lower",
+             "cue": {"senior": "Daily Achilles tendon maintenance dose; two-leg rise, single-leg descent",
+                     "youth": "Daily Achilles tendon dose; push up with two legs, lower on one for 6 seconds",
+                     "junior": "Push up with both legs, go down on one for 6 seconds; keeps your Achilles strong"}},
+            {"prescription": "Tibialis raise x 15 each side, 1-sec hold at top",
+             "cue": {"senior": "Shin loading and landing brake capacity",
+                     "youth": "Shin strength and landing control",
+                     "junior": "Makes the front of your shins strong for landing"}},
+            {"prescription": "Seated soleus raise – 2 x 15 @ moderate load, full range",
+             "cue": {"senior": "Base of sustained ankle stiffness across a routine",
+                     "youth": "Builds the ankle stiffness that lasts through a whole routine",
+                     "junior": "Makes your ankles stiff and strong for a whole routine"}},
+            {"prescription": "Stiff-ankle pogo x 15 reps",
+             "cue": {"senior": "Contact quality check; motor pattern reminder, not a conditioning set",
+                     "youth": "Just a quality check; focus on stiffness, not effort",
+                     "junior": "Just a quick check; keep your ankles stiff and be fast off the ground"}},
+        ],
+        "advanced": [
+            {"prescription": "Slow eccentric calf raise – 3 x 10 each leg, 6-sec lower",
+             "cue": {"senior": "Achilles tendon maintenance dose; maintain full range at the bottom",
+                     "youth": "Daily Achilles dose; full range every rep",
+                     "junior": "Go down slowly for 6 seconds; go all the way down every time"}},
+            {"prescription": "Tibialis raise x 20 + band, 1-sec hold at top",
+             "cue": {"senior": "Anterior shin loading with resistance; landing brake capacity",
+                     "youth": "Shin strength with band resistance; better landing control",
+                     "junior": "Use a band for extra challenge; makes your shins strong for landing"}},
+            {"prescription": "Seated soleus raise – 3 x 12 @ heavy, full range",
+             "cue": {"senior": "Heavy soleus dose; this muscle is chronically underloaded in gymnasts",
+                     "youth": "Heavy soleus work; most gymnasts don't train this enough",
+                     "junior": "Heavy work for the muscle deep in your calf; really important"}},
+            {"prescription": "Stiff-ankle pogo x 20 reps",
+             "cue": {"senior": "Contact quality check; count contacts and compare to main sessions",
+                     "youth": "Quality check; count contacts and compare to your main sessions",
+                     "junior": "Count your hops and try to beat your last number"}},
+            {"prescription": "Single-leg pogo hops x 10 each leg",
+             "cue": {"senior": "Single-leg ankle stiffness; progression from bilateral pogo",
+                     "youth": "One leg at a time; builds ankle stiffness independently",
+                     "junior": "Hop on one leg at a time; keep your ankle stiff"}},
+        ],
+    },
+    "hip": {
+        "label": "HIP — Lateral chain, glute med, and hip flexor capacity",
+        "beginner": [
+            {"prescription": "Side-lying hip abduction x 12 each side",
+             "cue": {"senior": "Slow and controlled; feel the glute med, not the hip flexor",
+                     "youth": "Go slow; feel the side of your hip working",
+                     "junior": "Go slow; feel the muscle on the side of your hip"}},
+            {"prescription": "Single-leg glute bridge x 10 each side",
+             "cue": {"senior": "Drive through the heel; full hip extension at the top",
+                     "youth": "Push through your heel; squeeze your glute at the top",
+                     "junior": "Push through your heel; squeeze your bum at the top"}},
+            {"prescription": "Hip flexor stretch – 2 x 20 secs each side",
+             "cue": {"senior": "Posterior pelvic tilt in the lunge position; feel the hip flexor lengthen",
+                     "youth": "Tilt your pelvis under in the stretch; feel the front of your hip opening",
+                     "junior": "Tuck your hips under in the stretch; feel the front of your hip stretching"}},
+        ],
+        "intermediate": [
+            {"prescription": "Copenhagen plank – 3 x 20 secs each side",
+             "cue": {"senior": "Adductor and lateral chain under sustained load",
+                     "youth": "Inner thigh and side-body under sustained hold",
+                     "junior": "Hold your body up using the inside of your leg and your side-body"}},
+            {"prescription": "Side-lying hip abduction with band – 3 x 12 each side",
+             "cue": {"senior": "Glute med activation; slow and deliberate",
+                     "youth": "Side-hip activation; slow and controlled with the band",
+                     "junior": "Slow and controlled with the band around your legs"}},
+            {"prescription": "Single-leg glute bridge – 3 x 10 each side",
+             "cue": {"senior": "Posterior chain and hip extension quality at end range",
+                     "youth": "Build hip extension strength at the top of the movement",
+                     "junior": "Push your hips up high and squeeze your bum at the top"}},
+            {"prescription": "Hip flexor stretch with posterior tilt – 2 x 30 secs each",
+             "cue": {"senior": "Hip flexor length for full take-off extension",
+                     "youth": "Stretch the hip flexor so you can fully extend at take-off",
+                     "junior": "Stretch the front of your hip so you can straighten fully when jumping"}},
+        ],
+        "advanced": [
+            {"prescription": "Copenhagen plank – 3 x 25 secs each side",
+             "cue": {"senior": "Lateral chain endurance; groin and adductor capacity",
+                     "youth": "Hold longer; building groin and side-body endurance",
+                     "junior": "Hold for longer; builds the sides of your body and inner thighs"}},
+            {"prescription": "Side-lying hip abduction with band – 3 x 15 each + 2-sec hold",
+             "cue": {"senior": "Isometric component at end range; tendon resilience at the glute med insertion",
+                     "youth": "Hold at the top for 2 seconds; builds tendon strength in the hip",
+                     "junior": "Hold at the top for 2 seconds; makes your hip muscles extra strong"}},
+            {"prescription": "Single-leg glute bridge – 3 x 12 each + 3-sec hold at top",
+             "cue": {"senior": "Isometric hip extension; mimics the demands of single-leg landing",
+                     "youth": "Hold at the top for 3 seconds; trains single-leg landing strength",
+                     "junior": "Hold at the top for 3 seconds; makes your legs strong for landing"}},
+            {"prescription": "Hip flexor stretch + activation – 2 x 30 secs + 10 reps each",
+             "cue": {"senior": "Stretch then activate; hip flexor must be both long and strong",
+                     "youth": "Stretch then do 10 knee drives; the hip flexor needs to be flexible and strong",
+                     "junior": "Stretch then do 10 knee lifts; your hip needs to be stretchy and strong"}},
+            {"prescription": "Single-leg RDL x 8 each leg",
+             "cue": {"senior": "Posterior chain and hip proprioception under single-leg balance",
+                     "youth": "Builds balance, hamstring strength, and hip control on one leg",
+                     "junior": "Stand on one leg and lean forward; builds balance and back-of-leg strength"}},
+        ],
+    },
+    "shoulder": {
+        "label": "SHOULDER — Scapular control and overhead position health",
+        "beginner": [
+            {"prescription": "Y/T/W raise prone or standing x 8 each",
+             "cue": {"senior": "Scapular control at the overhead depression position",
+                     "youth": "Build shoulder blade control in the positions used on the trampoline",
+                     "junior": "Make your shoulder blades strong in the positions you use when jumping"}},
+            {"prescription": "Band pull-apart x 15",
+             "cue": {"senior": "Posterior shoulder and horizontal retraction",
+                     "youth": "Pull the band apart; squeeze the back of your shoulders",
+                     "junior": "Pull the band apart; squeeze your shoulder blades together"}},
+            {"prescription": "Overhead wall reach x 8 each side",
+             "cue": {"senior": "Thoracic extension and shoulder overhead mobility",
+                     "youth": "Reach up the wall; feel your upper back and shoulder stretching",
+                     "junior": "Reach up the wall as high as you can; feel your back and shoulders stretching"}},
+        ],
+        "intermediate": [
+            {"prescription": "Y/T/W raise prone – 2 x 10 each position",
+             "cue": {"senior": "Scapular control at the overhead depression position specific to trampoline",
+                     "youth": "Build the shoulder blade control needed at trampoline bed contact",
+                     "junior": "Make your shoulder blades strong in the positions your body uses on the trampoline"}},
+            {"prescription": "Band pull-apart – 3 x 20",
+             "cue": {"senior": "Posterior shoulder and horizontal retraction capacity",
+                     "youth": "Builds the back of your shoulders; squeeze your shoulder blades on every rep",
+                     "junior": "Pull the band apart and squeeze your shoulder blades; do it 20 times"}},
+            {"prescription": "Serratus push-up from wall – 3 x 10",
+             "cue": {"senior": "Scapular protraction and winging prevention",
+                     "youth": "Push through your shoulder blades; prevents them from sticking out",
+                     "junior": "Push through your shoulders at the top; stops your shoulder blades poking out"}},
+            {"prescription": "Overhead wall reach – 10 reps each side",
+             "cue": {"senior": "Thoracic extension and shoulder mobility in the overhead position",
+                     "youth": "Reach up the wall; improve your overhead position",
+                     "junior": "Reach up the wall as far as you can; makes it easier to put your arms up high"}},
+        ],
+        "advanced": [
+            {"prescription": "Y/T/W raise prone + 1–2 kg – 3 x 10 each position",
+             "cue": {"senior": "Loaded scapular control at depression position; match trampoline demands",
+                     "youth": "Weighted shoulder blade control; matches the trampoline shoulder demand",
+                     "junior": "Hold a small weight while doing the shoulder blade exercises; makes them harder"}},
+            {"prescription": "Band pull-apart – 3 x 20 + heavier band",
+             "cue": {"senior": "Posterior shoulder capacity under increased resistance",
+                     "youth": "Harder band; builds more shoulder strength",
+                     "junior": "Harder band; makes your shoulders even stronger"}},
+            {"prescription": "Serratus push-up from floor – 3 x 12",
+             "cue": {"senior": "Harder base; serratus capacity for overhead control",
+                     "youth": "From the floor for more challenge; builds overhead shoulder control",
+                     "junior": "Push-ups from the floor with extra shoulder push at the top"}},
+            {"prescription": "Overhead wall reach – 12 reps each side with 2-sec hold",
+             "cue": {"senior": "Hold the end range; thoracic and shoulder mobility maintenance",
+                     "youth": "Hold at the top for 2 seconds; keep your overhead position",
+                     "junior": "Hold at the top for 2 seconds; keeps your shoulders moving well"}},
+            {"prescription": "Single-arm overhead carry – 2 x 15 m each side",
+             "cue": {"senior": "Scapular stability under load in the overhead position",
+                     "youth": "Carry a weight overhead; keeps your shoulder blade stable",
+                     "junior": "Walk with a weight held straight above you; keep your shoulder strong"}},
+        ],
+    },
+    "knee": {
+        "label": "KNEE — Patellar tendon, VMO, and landing mechanics",
+        "beginner": [
+            {"prescription": "Slow step down x 6 each leg, 4-sec lower",
+             "cue": {"senior": "Patellar tendon dose at introductory volume; knee over 2nd toe",
+                     "youth": "Slow step downs for knee health; keep your knee over your 2nd toe",
+                     "junior": "Go down slowly off a step; keep your knee pointing over your toes"}},
+            {"prescription": "Terminal knee extension with band x 12 each leg",
+             "cue": {"senior": "VMO activation and knee end-range control",
+                     "youth": "Squeeze the front of your thigh at full extension; builds knee control",
+                     "junior": "Straighten your leg all the way and squeeze your thigh"}},
+            {"prescription": "Bodyweight squat x 10 with 2-sec pause at bottom",
+             "cue": {"senior": "Knee loading at depth; builds position strength",
+                     "youth": "Hold at the bottom for 2 seconds; builds strength in the deep position",
+                     "junior": "Hold at the bottom for 2 seconds; makes your legs strong in the low position"}},
+        ],
+        "intermediate": [
+            {"prescription": "Spanish squat isometric hold – 3 x 30 secs",
+             "cue": {"senior": "Patellar tendon daily load at 60° knee flexion",
+                     "youth": "Isometric hold for patellar tendon health at your knee's hardest working angle",
+                     "junior": "Hold the position with your back against a strap; feel your thigh muscles working"}},
+            {"prescription": "Terminal knee extension with band – 3 x 15 each leg",
+             "cue": {"senior": "VMO activation and knee end-range control",
+                     "youth": "Squeeze the front of your thigh at full extension; builds knee control",
+                     "junior": "Straighten your leg fully and squeeze your thigh really hard"}},
+            {"prescription": "Slow eccentric step down – 3 x 8 each leg, 5-sec lower",
+             "cue": {"senior": "Tendon stimulus at sub-maximal effort",
+                     "youth": "Slow step downs for knee tendon health; 5 seconds going down",
+                     "junior": "Go down off a step really slowly for 5 seconds; makes your knees strong"}},
+            {"prescription": "Tibialis raise x 15",
+             "cue": {"senior": "Anterior shin support and landing mechanics reinforcement",
+                     "youth": "Shin strength for better landing mechanics",
+                     "junior": "Makes the front of your shins strong for landing"}},
+        ],
+        "advanced": [
+            {"prescription": "Spanish squat isometric hold – 3 x 40 secs",
+             "cue": {"senior": "Extended patellar tendon dose; monitor load tolerance bilaterally",
+                     "youth": "Longer hold; notice if one leg tires faster",
+                     "junior": "Hold for longer; notice if one leg gets tired faster"}},
+            {"prescription": "Terminal knee extension with band – 3 x 15 each leg + heavier band",
+             "cue": {"senior": "Heavier band; VMO under higher resistance at end range",
+                     "youth": "Harder band; builds more quad control at full extension",
+                     "junior": "Harder band; makes your thigh squeeze even harder"}},
+            {"prescription": "Slow eccentric step down – 3 x 10 each leg + vest, 5-sec lower",
+             "cue": {"senior": "Loaded tendon dose; replicates single-leg landing loads",
+                     "youth": "Weighted step downs; matches the force your knee takes when landing",
+                     "junior": "Wear a heavy vest while stepping down slowly; makes your knees even stronger"}},
+            {"prescription": "Tibialis raise x 20 + band",
+             "cue": {"senior": "Loaded anterior shin; landing brake under resistance",
+                     "youth": "Banded for more challenge; better landing brake",
+                     "junior": "Use a band for more challenge; makes your shins stronger for landing"}},
+            {"prescription": "Single-leg squat to box – 3 x 6 each leg",
+             "cue": {"senior": "Full single-leg knee loading; sit to the box and stand; knee tracks midfoot",
+                     "youth": "Squat down to a box on one leg and stand; keep your knee over your foot",
+                     "junior": "Sit down to a box on one leg and stand up; keep your knee steady"}},
+        ],
+    },
+    "trunk": {
+        "label": "TRUNK — Stiffness capacity and force transfer",
+        "beginner": [
+            {"prescription": "Hollow body hold – 3 x 15 secs",
+             "cue": {"senior": "Anti-extension; press lower back flat; this is the force transfer shape",
+                     "youth": "Press your lower back flat; this is the shape your body needs on the trampoline",
+                     "junior": "Press your back flat on the floor; this is the shape you need when jumping"}},
+            {"prescription": "Dead bug – 3 x 6 each side, 3-sec lower",
+             "cue": {"senior": "Anti-extension under limb movement; back stays flat throughout",
+                     "youth": "Move your arm and leg slowly; your back stays flat on the floor",
+                     "junior": "Move your arm and leg slowly; keep your back flat on the floor"}},
+            {"prescription": "Plank – 3 x 20 secs",
+             "cue": {"senior": "Brace everything — this is not a passive hold",
+                     "youth": "Squeeze everything tight — don't just hang there",
+                     "junior": "Squeeze everything tight — your whole body should be working"}},
+        ],
+        "intermediate": [
+            {"prescription": "Hollow body hold – 3 x 20 secs",
+             "cue": {"senior": "Anti-extension; the force transfer shape required at every bed contact",
+                     "youth": "The tight shape your body needs at every trampoline contact",
+                     "junior": "The tight shape your body needs every time you bounce"}},
+            {"prescription": "Pallof press – 3 x 10 each side",
+             "cue": {"senior": "Anti-rotation; lateral trunk stiffness under band resistance",
+                     "youth": "Push against the band's pull; keeps your trunk stiff against rotation",
+                     "junior": "Push the band out; don't let it twist you; keep your body straight"}},
+            {"prescription": "RKC plank – 3 x 20 secs",
+             "cue": {"senior": "Total trunk co-contraction under sustained isometric load",
+                     "youth": "Squeeze everything — glutes, quads, fists — as hard as you can",
+                     "junior": "Squeeze every muscle as hard as you can — bum, legs, hands, everything"}},
+            {"prescription": "Suitcase carry – 3 x 20 m each side",
+             "cue": {"senior": "Lateral trunk chain under continuous walking load",
+                     "youth": "Walk with weight on one side; don't lean; feel your side-body working",
+                     "junior": "Walk with a weight in one hand; don't lean over; stay tall"}},
+        ],
+        "advanced": [
+            {"prescription": "Hollow body hold – 4 x 25 secs",
+             "cue": {"senior": "Extended anti-extension; arms overhead for maximum lever demand",
+                     "youth": "Longer hold; arms overhead; the hardest hollow position",
+                     "junior": "Hold for longer with arms up; the hardest version"}},
+            {"prescription": "Pallof press – 3 x 12 each side + 2-sec hold at extension",
+             "cue": {"senior": "Anti-rotation with isometric hold at end range; force transfer under sustained demand",
+                     "youth": "Hold the press out for 2 seconds; builds stiffness that transfers to jumping",
+                     "junior": "Hold the band out for 2 seconds; keeps your body stiff for jumping"}},
+            {"prescription": "RKC plank – 3 x 25 secs",
+             "cue": {"senior": "Maximum contraction plank; peak trunk co-contraction stimulus",
+                     "youth": "Squeeze everything harder for longer; peak trunk stiffness challenge",
+                     "junior": "Squeeze every muscle as hard as you can for longer; the hardest plank"}},
+            {"prescription": "Suitcase carry – 3 x 25 m each side + 10% load",
+             "cue": {"senior": "Heavier lateral load; trunk must resist under longer exposure",
+                     "youth": "Heavier and further; your side-body works much harder",
+                     "junior": "A bit heavier and a bit further; really tests your side-body strength"}},
+            {"prescription": "Hollow body rock – 3 x 10 rocks",
+             "cue": {"senior": "Dynamic trunk stiffness under movement; any shape change is a position leak",
+                     "youth": "Rock in the hollow position; if your shape changes, you are leaking",
+                     "junior": "Rock in the tight shape; if your shape changes, your body is not stiff enough"}},
+        ],
+    },
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PROGRAMME HEADER
+# ═══════════════════════════════════════════════════════════════════════════
+
+PROGRAMME_HEADER_COACH = """================================================================
+  STRENGTH & CONDITIONING — TRAMPOLINE GYMNAST
+  Organised through the JOBS Framework
+  Jumps | Overhead | Brace | Strength
+  Strength 4 Trampoline
+================================================================"""
+
+PROGRAMME_HEADER_ATHLETE = """================================================================
+  STRENGTH & CONDITIONING — TRAMPOLINE GYMNAST
+  Strength 4 Trampoline
+================================================================"""
+
