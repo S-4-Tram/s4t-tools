@@ -100,6 +100,7 @@ class ProgrammeConfig:
     main_sessions: int      # 1–6
     micro_sessions: int     # 0–5
     version: str            # "athlete" | "coach"
+    programme_seed: int = 0 # shifts starting position in ranked pools
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -111,26 +112,46 @@ EQUIPMENT_RANK = {"bodyweight": 0, "limited": 1, "full": 2}
 # Baseline max exercises per section (applied before competition modifier).
 # Sections not listed have no baseline cap.
 SECTION_MAX_EXERCISES = {
-    "strength": 4,
+    "strength": 3,   # 1 main lift + 2 accessories
     "jumps": 2,
+    "brace": 3,
     "overhead": 3,
 }
+
+# Fixed session section order (overrides programme-type ordering).
+SESSION_SECTION_ORDER = ["jumps", "strength", "brace", "overhead"]
 
 # Sections where the top-ranked exercise is locked into every session.
 SECTION_LOCK_TOP = {"strength"}
 
-# Day bias: for sections listed here, exercises matching the given
-# contraction_mode values get a small boost on that session_number.
-DAY_BIAS = {
-    "jumps": {
-        2: {"plyometric", "fast_ssc"},
-        3: {"reactive", "fast"},
-    },
+# Jump day intent: maps session_number to desired jump_type.
+# Exercises matching the day's intent are selected first;
+# remaining slots are filled from the rest of the pool.
+JUMP_DAY_INTENT = {
+    1: "repeated",
+    2: "max_output",
+    3: "reactive",
+}
+
+# Biomechanics preference profile per jump day. Scored against exercise
+# traits to differentiate exercises within the same intent tier.
+JUMP_DAY_PROFILE = {
+    1: {"load": "low", "tempo": "explosive"},                     # repeated: bodyweight explosive
+    2: {"load": "heavy", "tempo": "explosive"},                   # max_output: loaded explosive
+    3: {"contraction_mode": "reactive", "tempo": "fast"},         # reactive: fast stiff contacts
 }
 
 
 def filter_exercises_for_equipment(exercise_pool, equipment):
-    """Return the best-matched exercise per equipment-variant slot."""
+    """Return the best-matched exercise per equipment-variant slot.
+
+    Uses positional variant grouping: consecutive exercises with
+    descending equipment rank are treated as variants of one slot,
+    and the best match at or below the available tier is selected.
+
+    Only suitable for sections where exercises are explicitly arranged
+    as equipment variant groups (e.g. Barbell → Dumbbell → Bodyweight).
+    """
     equip_rank = EQUIPMENT_RANK[equipment]
     selected = []
     i = 0
@@ -151,11 +172,26 @@ def filter_exercises_for_equipment(exercise_pool, equipment):
             if ex_rank <= equip_rank:
                 if best is None or ex_rank > EQUIPMENT_RANK[best["equipment"]]:
                     best = ex
-        if best is None:
-            best = group[-1]
-        selected.append(best)
+        if best is not None:
+            selected.append(best)
         i = j
     return selected
+
+
+def filter_exercises_strict(exercise_pool, equipment):
+    """Return all exercises at or below the available equipment tier.
+
+    No variant grouping — every exercise is treated independently.
+    Use for sections with a unified pool of independent exercises.
+    """
+    equip_rank = EQUIPMENT_RANK[equipment]
+    return [ex for ex in exercise_pool
+            if EQUIPMENT_RANK[ex["equipment"]] <= equip_rank]
+
+
+# Sections that use strict (non-grouping) equipment filtering.
+# All other sections use the positional variant grouping filter.
+STRICT_EQUIPMENT_SECTIONS = {"jumps"}
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -227,32 +263,214 @@ def get_exercise_text(exercise, week, age_group, version):
 # SESSION BUILDING
 # ═══════════════════════════════════════════════════════════════════════════
 
-def _apply_day_bias(selected, section_key, session_number):
-    """Re-sort exercises by day bias. Matching exercises float to the top,
-    non-matching keep their relative order below."""
-    bias_config = DAY_BIAS.get(section_key)
-    if not bias_config:
+# Intent bonus added to jump exercises that match the day's jump_type.
+# Must be large enough to outweigh biomechanics trait differences but
+# still allow biomechanics to break ties between equally-intent-matched exercises.
+_JUMP_INTENT_BONUS = 10
+
+# Complementary trait preference for the secondary jump slot.
+# For each day, defines which trait values are preferred for slot 2,
+# given what slot 1 already provides.
+JUMP_SECONDARY_PROFILE = {
+    1: {"tempo": "fast", "contraction_mode": "reactive"},     # repeated primary → elastic/cyclic complement
+    2: {"load": "low", "tempo": "explosive"},                 # max_output primary → lighter explosive complement (base)
+    3: {"load": "low", "tempo": "explosive"},                 # reactive primary → supportive explosive complement
+}
+
+# Traits compared for contrast scoring on Day 2 slot 2.
+_DAY2_CONTRAST_TRAITS = ("load", "tempo", "contraction_mode")
+
+# Penalty applied when slot 2 shares the same movement pattern as slot 1.
+_PATTERN_DUPLICATE_PENALTY = 3
+
+
+def _is_unilateral(ex):
+    """Check if an exercise is unilateral based on its name."""
+    name = ex.get("name", "")
+    return "SL " in name or "Single Leg" in name
+
+
+def _get_movement_pattern(ex):
+    """Derive the movement pattern category from the exercise name.
+
+    Used to penalise slot 2 candidates that duplicate slot 1's pattern.
+    """
+    name = ex.get("name", "").lower()
+    if any(k in name for k in ("pogo", "ankling", "ankle bounces", "10:5")):
+        return "stiffness"
+    if any(k in name for k in ("drop", "depth", "snap down", "reactive jump from")):
+        return "rebound"
+    if any(k in name for k in ("cmj", "countermovement")):
+        return "cmj"
+    if any(k in name for k in ("broad", "lateral bounds", "lateral split")):
+        return "displacement"
+    if any(k in name for k in ("box jump", "box jump", "seated")):
+        return "box"
+    if any(k in name for k in ("squat jump", "pause squat")):
+        return "squat_jump"
+    if "compass" in name:
+        return "compass"
+    if "hurdle" in name:
+        return "hurdle"
+    if "twist" in name:
+        return "twist"
+    if any(k in name for k in ("tuck", "straight jumps", "split jumps")):
+        return "cyclic_vertical"
+    if "bounding" in name or "bounds" in name:
+        return "bounding"
+    if "trap bar" in name:
+        return "loaded_pull"
+    if "loaded" in name or "weighted" in name:
+        return "loaded_push"
+    return "other"
+
+
+def _jump_composite_score(ex, intent, profile):
+    """Score a jump exercise against intent + day profile."""
+    traits = ex.get("traits", {})
+    bonus = 0
+    if intent and traits.get("jump_type") == intent:
+        bonus = _JUMP_INTENT_BONUS
+    bio = 0
+    if profile and traits:
+        bio = sum(1 for k, v in profile.items() if traits.get(k) == v)
+    return bonus + bio
+
+
+def rank_jump_pool(selected, session_number):
+    """Rank jump exercises by intent match + day profile score.
+
+    Stable sort: ties preserve original pool order.
+    If no intent or profile is defined for this session_number, returns
+    the pool unchanged.
+    """
+    intent = JUMP_DAY_INTENT.get(session_number)
+    profile = JUMP_DAY_PROFILE.get(session_number)
+
+    if not intent and not profile:
         return selected
-    target_modes = bias_config.get(session_number)
-    if not target_modes:
-        return selected
-    biased = []
-    rest = []
-    for ex in selected:
-        mode = ex.get("traits", {}).get("contraction_mode")
-        if mode and mode in target_modes:
-            biased.append(ex)
-        else:
-            rest.append(ex)
-    return biased + rest
+
+    return sorted(
+        selected,
+        key=lambda ex: _jump_composite_score(ex, intent, profile),
+        reverse=True,
+    )
+
+
+def _rotate_within_tier(exercises, week, seed=0):
+    """Rotate a ranked list by seed + week offset.
+
+    seed shifts the starting position (varies across programmes).
+    week advances by 1 within a programme (varies across the block).
+    Wraps around when the end is reached.
+    """
+    if len(exercises) <= 1:
+        return exercises
+    offset = (seed + week - 1) % len(exercises)
+    return exercises[offset:] + exercises[:offset]
+
+
+def select_jump_pair(pool, session_number, week=1, seed=0):
+    """Select a primary + complementary jump pair for the session.
+
+    Slot 1 (primary): ranked by intent + day profile, then offset
+        by seed within the intent-matched tier. The same pair is
+        selected for all weeks within a programme (week is not used
+        for exercise selection — only for prescription lookup).
+    Slot 2 (secondary): ranked by secondary profile from the
+        remaining pool (excluding slot 1), offset by seed.
+
+    If only 1 exercise in pool, returns just that exercise.
+    If pool is empty, returns empty list.
+    """
+    if len(pool) <= 1:
+        return list(pool)
+
+    intent = JUMP_DAY_INTENT.get(session_number)
+    profile = JUMP_DAY_PROFILE.get(session_number)
+    secondary_profile = JUMP_SECONDARY_PROFILE.get(session_number)
+
+    # Rank the full pool
+    ranked = rank_jump_pool(pool, session_number)
+
+    # Partition into intent-matched and non-matched, preserving rank order
+    matched = [ex for ex in ranked
+               if ex.get("traits", {}).get("jump_type") == intent]
+    unmatched = [ex for ex in ranked
+                 if ex.get("traits", {}).get("jump_type") != intent]
+
+    # Slot 1: offset by seed only (stable across the block)
+    if matched:
+        rotated_matched = _rotate_within_tier(matched, 1, seed)
+        primary = rotated_matched[0]
+    else:
+        rotated_all = _rotate_within_tier(ranked, 1, seed)
+        primary = rotated_all[0]
+
+    # Remainder: everything except the selected primary
+    remainder = [ex for ex in ranked if ex is not primary]
+
+    # Hard rule: if slot 1 is unilateral, exclude unilateral from slot 2 candidates
+    primary_unilateral = _is_unilateral(primary)
+    if primary_unilateral:
+        bilateral_remainder = [ex for ex in remainder if not _is_unilateral(ex)]
+        if bilateral_remainder:
+            remainder = bilateral_remainder
+
+    # Slot 2: rank remainder by secondary profile + pattern diversity + contrast.
+    primary_traits = primary.get("traits", {})
+    primary_pattern = _get_movement_pattern(primary)
+
+    if secondary_profile and remainder:
+        def secondary_score(ex):
+            traits = ex.get("traits", {})
+            if not traits:
+                return 0
+            # Base: secondary profile match
+            base = sum(1 for k, v in secondary_profile.items()
+                       if traits.get(k) == v)
+            # Day 2 contrast bonus
+            contrast = 0
+            if session_number == 2:
+                for trait_key in _DAY2_CONTRAST_TRAITS:
+                    s1_val = primary_traits.get(trait_key)
+                    s2_val = traits.get(trait_key)
+                    if s1_val and s2_val and s1_val != s2_val:
+                        contrast += 1
+            # Pattern diversity penalty (soft)
+            pattern_penalty = 0
+            if _get_movement_pattern(ex) == primary_pattern:
+                pattern_penalty = _PATTERN_DUPLICATE_PENALTY
+            return base + contrast - pattern_penalty
+
+        remainder = sorted(remainder, key=secondary_score, reverse=True)
+
+    remainder = _rotate_within_tier(remainder, 1, seed)
+    secondary = remainder[0] if remainder else None
+
+    result = [primary]
+    if secondary:
+        result.append(secondary)
+    return result
+
+
+def _deduplicate(exercises):
+    """Remove duplicate exercises (by name), preserving order."""
+    seen = set()
+    result = []
+    for ex in exercises:
+        if ex["name"] not in seen:
+            seen.add(ex["name"])
+            result.append(ex)
+    return result
 
 
 def select_exercises_for_section(section_key, cfg, session_number=1):
     """Select and filter exercises for a single JOBS section.
 
-    session_number drives deterministic rotation when a section cap
-    is active. Sections in SECTION_LOCK_TOP keep the top-ranked
-    exercise in every session, rotating the remaining slots.
+    Jumps: uses the jump pair selection system.
+    Strength: 1 locked main lift + 2 rotating accessories (no duplicates).
+    Brace/Overhead: capped selection with day rotation (no duplicates).
     """
     pool = EXERCISE_LIBRARY[cfg.focus][section_key]
 
@@ -260,34 +478,44 @@ def select_exercises_for_section(section_key, cfg, session_number=1):
     constraints = resolve_constraints(section_key, cfg)
     pool = apply_exercise_constraints(pool, constraints)
 
-    selected = filter_exercises_for_equipment(pool, cfg.equipment)
+    if section_key in STRICT_EQUIPMENT_SECTIONS:
+        selected = filter_exercises_strict(pool, cfg.equipment)
+    else:
+        selected = filter_exercises_for_equipment(pool, cfg.equipment)
 
-    # ── day bias (light re-sort before cap) ──
-    selected = _apply_day_bias(selected, section_key, session_number)
+    # ── deduplicate (prevent same exercise appearing twice in pool) ──
+    selected = _deduplicate(selected)
 
-    # ── baseline section cap with session rotation ──
-    if section_key in SECTION_MAX_EXERCISES and selected:
+    # ── jump pair selection ──
+    if section_key == "jumps":
+        selected = select_jump_pair(selected, session_number, cfg.week, cfg.programme_seed)
+
+    # ── strength: 1 locked main lift + 2 rotating accessories ──
+    elif section_key == "strength" and selected:
+        locked = selected[0]
+        remainder = [ex for ex in selected[1:] if ex["name"] != locked["name"]]
+        # Rotate accessories by day, selecting 2 unique per session
+        offset = (session_number - 1) * 2
+        accessories = []
+        for i in range(2):
+            if remainder:
+                idx = (offset + i) % len(remainder)
+                if remainder[idx]["name"] not in {a["name"] for a in accessories}:
+                    accessories.append(remainder[idx])
+        selected = [locked] + accessories
+
+    # ── brace / overhead: capped with day rotation, no duplicates ──
+    elif section_key in SECTION_MAX_EXERCISES and selected:
         cap = SECTION_MAX_EXERCISES[section_key]
-        lock_top = section_key in SECTION_LOCK_TOP
-
-        if lock_top:
-            locked = selected[0]
-            remainder = selected[1:]
-            rotate_cap = cap - 1
-            offset = (session_number - 1) * rotate_cap
-            rotated = []
-            for i in range(rotate_cap):
-                if remainder:
-                    idx = (offset + i) % len(remainder)
-                    rotated.append(remainder[idx])
-            selected = [locked] + rotated
-        else:
-            offset = (session_number - 1) * cap
-            rotated = []
-            for i in range(cap):
+        offset = (session_number - 1) * cap
+        rotated = []
+        for i in range(cap):
+            if selected:
                 idx = (offset + i) % len(selected)
-                rotated.append(selected[idx])
-            selected = rotated
+                candidate = selected[idx]
+                if candidate["name"] not in {r["name"] for r in rotated}:
+                    rotated.append(candidate)
+        selected = rotated
 
     selected = apply_competition_modifier(selected, cfg.proximity)
 
@@ -296,14 +524,66 @@ def select_exercises_for_section(section_key, cfg, session_number=1):
         if lf["section_bias"] == section_key and section_key in _BONUS_EXERCISES:
             bonus = _BONUS_EXERCISES[section_key]
             if EQUIPMENT_RANK[bonus["equipment"]] <= EQUIPMENT_RANK[cfg.equipment]:
-                selected.append(bonus)
+                if bonus["name"] not in {ex["name"] for ex in selected}:
+                    selected.append(bonus)
 
     return selected
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# PROGRAMME-LEVEL PROGRESSION
+# ═══════════════════════════════════════════════════════════════════════════
+
+MAIN_LIFT_PROGRESSION = {
+    1: {
+        "prescription": "4 x 6 @ 70–75%",
+        "cue": {
+            "senior": "Volume week; establish positions under moderate load; 2–3 min rest; every rep is a position check",
+            "youth": "Volume week; get every position right under moderate load; 2–3 min rest",
+            "junior": "Lots of reps this week; focus on doing every rep really well; rest 2–3 minutes",
+        },
+    },
+    2: {
+        "prescription": "4 x 5 @ 77–80%",
+        "cue": {
+            "senior": "Load increases; maintain the positions from W1; if quality drops, the load is too high",
+            "youth": "A bit heavier than last week; keep the same positions; drop the weight if form breaks",
+            "junior": "A bit heavier; do it exactly the same way as last week; go lighter if it gets messy",
+        },
+    },
+    3: {
+        "prescription": "4 x 4 @ 82–87%",
+        "cue": {
+            "senior": "Intensity week; fewer reps, heavier load; 3 min rest; intent and position are the metrics",
+            "youth": "Heavier but fewer reps; 3 min rest; technique must stay the same as lighter weeks",
+            "junior": "Heavier but fewer reps; rest 3 minutes; do every rep as well as the lighter weeks",
+        },
+    },
+    4: {
+        "prescription": "3 x 3 @ 87–92%",
+        "cue": {
+            "senior": "Peak week; maximal intent per rep; 3–4 min rest; every rep is a display of the block",
+            "youth": "Heaviest week; make every single rep your best; 3–4 min rest",
+            "junior": "The heaviest week; make every rep perfect; rest 3–4 minutes",
+        },
+    },
+}
+
+
+def _apply_main_lift_override(exercise, cfg):
+    """Replace the main lift prescription with programme-level progression."""
+    week = min(cfg.week, max(MAIN_LIFT_PROGRESSION.keys()))
+    prog = MAIN_LIFT_PROGRESSION[week]
+    prescription = prog["prescription"]
+    cue = prog["cue"][cfg.age_group]
+    return f"{exercise['name']}  —  {prescription}\n    → {cue}"
+
+
 def build_session_data(day_number, session_number, total_main, cfg):
     """Build the structured data for a main session (no formatting)."""
-    sections = get_sections_for_duration(cfg.focus, cfg.duration)
+    available = set(get_sections_for_duration(cfg.focus, cfg.duration))
+    # Fixed section order: Jumps → Strength → Brace → Overhead
+    sections = [s for s in SESSION_SECTION_ORDER if s in available]
     vol_modifier = COMPETITION_PROXIMITY[cfg.proximity]["volume_modifier"]
     warmup_key = "short" if cfg.duration == 30 else "full"
 
@@ -311,8 +591,14 @@ def build_session_data(day_number, session_number, total_main, cfg):
     for section_key in sections:
         exercises = select_exercises_for_section(section_key, cfg, session_number)
         exercise_texts = []
-        for ex in exercises:
-            text = get_exercise_text(ex, cfg.week, cfg.age_group, cfg.version)
+        for ex_idx, ex in enumerate(exercises):
+            # Override main lift (first exercise in locked strength section)
+            if (section_key in SECTION_LOCK_TOP
+                    and ex_idx == 0
+                    and cfg.week in MAIN_LIFT_PROGRESSION):
+                text = _apply_main_lift_override(ex, cfg)
+            else:
+                text = get_exercise_text(ex, cfg.week, cfg.age_group, cfg.version)
             if vol_modifier < 0:
                 week_idx = min(cfg.week - 1, len(ex["weeks"]) - 1)
                 orig = ex["weeks"][week_idx]["prescription"]
