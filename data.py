@@ -3199,6 +3199,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "iso",
             "video": None,
         },
         {
@@ -3206,6 +3207,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/ifYSHcGTDss",
         },
         {
@@ -3213,6 +3215,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/cChI-QTUbPU",
         },
         # ── front support family ──
@@ -3221,6 +3224,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "iso",
             "video": "https://www.youtube.com/shorts/9ypDDHle--o",
         },
         {
@@ -3228,6 +3232,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/LciUxwWhD6A",
         },
         {
@@ -3235,6 +3240,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/7a4l95CNjuE",
         },
         # ── supine line hold family ──
@@ -3243,6 +3249,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "iso",
             "video": "https://youtube.com/shorts/cc-IU-zhxWM",
         },
         {
@@ -3250,6 +3257,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/jVQjbibn7Ds",
         },
         {
@@ -3257,6 +3265,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/KurZbCKD5AQ",
         },
         # ── table top family ──
@@ -3265,6 +3274,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "iso",
             "video": "https://www.youtube.com/shorts/TdBnDP0NJUE",
         },
         # ── deadbugs ──
@@ -3273,6 +3283,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://www.youtube.com/shorts/NsI3L2PMj2o",
         },
         # ── v-sit / tuck family ──
@@ -3281,6 +3292,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://www.youtube.com/shorts/AXz7ZprWQE8",
         },
         {
@@ -3288,6 +3300,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/kOI2k-u3YPQ",
         },
     ],
@@ -3298,6 +3311,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "iso",
             "video": "https://youtube.com/shorts/3DkGfvdPZrA",
         },
         {
@@ -3305,6 +3319,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/D-wng4X0OrY",
         },
         {
@@ -3312,6 +3327,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": None,
         },
         {
@@ -3319,6 +3335,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/oZfJA8Nails",
         },
         # ── side plank family ──
@@ -3327,6 +3344,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://www.youtube.com/shorts/p5mBtDHne34",
         },
         {
@@ -3334,6 +3352,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": None,
         },
         {
@@ -3341,6 +3360,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/1ObSUkAZkXk",
         },
         # ── loaded side plank family ──
@@ -3349,6 +3369,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["dumbbell"],
             "equipment_level": ["partial"],
             "requires_support": False,
+            "subtype": "iso",
             "video": "https://youtube.com/shorts/ZFnn4HjEmBI",
         },
         {
@@ -3356,6 +3377,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["dumbbell"],
             "equipment_level": ["partial"],
             "requires_support": False,
+            "subtype": "iso",
             "video": "https://youtube.com/shorts/CcbUCuH-iwk",
         },
         {
@@ -3363,6 +3385,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["dumbbell"],
             "equipment_level": ["partial"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/ak4r-a8HLlM",
         },
         # ── drags ──
@@ -3371,6 +3394,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/Ox8zptCafio",
         },
         {
@@ -3378,6 +3402,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/q-ZJ4nxr7ys",
         },
     ],
@@ -3388,6 +3413,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "iso",
             "video": "https://youtube.com/shorts/FYi4jJeUjx4",
         },
         {
@@ -3395,6 +3421,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/aO-CzZ_6lvs",
         },
         {
@@ -3402,6 +3429,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight", "dumbbell"],
             "equipment_level": ["bodyweight", "partial"],
             "requires_support": True,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/Fsa-TLgwkgk",
         },
         # ── standalone posterior ──
@@ -3410,6 +3438,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/x_rrbw_IPg0",
         },
         {
@@ -3417,6 +3446,7 @@ BRACE_EXERCISES = {
             "equipment_type": ["bodyweight"],
             "equipment_level": ["bodyweight"],
             "requires_support": False,
+            "subtype": "dynamic",
             "video": "https://youtube.com/shorts/n40td4Idpvc",
         },
     ],
@@ -3723,6 +3753,132 @@ OVERHEAD_EXERCISES = {
             "video": "https://youtube.com/shorts/PozR_Q8bXFA",
         },
     ],
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# STAGE-BASED PROGRESSION
+# ═══════════════════════════════════════════════════════════════════════════
+
+STAGE_MAP = {
+    4: {1: "establish", 2: "build", 3: "push", 4: "realise"},
+    6: {1: "establish", 2: "establish", 3: "build", 4: "build",
+        5: "push", 6: "realise"},
+    8: {1: "establish", 2: "establish", 3: "build", 4: "build",
+        5: "build", 6: "push", 7: "push", 8: "realise"},
+}
+
+STAGE_PRESCRIPTIONS = {
+    "strength": {
+        "main_lift": {
+            "establish": "4 x 6 @ 70–75%",
+            "build": "4 x 5 @ 77–80%",
+            "push": "4 x 4 @ 82–87%",
+            "realise": "3 x 3 @ 87–92%",
+        },
+        "accessory": {
+            "establish": "3 x 10",
+            "build": "3 x 8",
+            "push": "4 x 6",
+            "realise": "3 x 6",
+        },
+    },
+    "brace": {
+        "iso": {
+            "establish": "3 x 20 sec",
+            "build": "3 x 30 sec",
+            "push": "4 x 30 sec",
+            "realise": "3 x 30 sec",
+        },
+        "dynamic": {
+            "establish": "3 x 8",
+            "build": "3 x 10",
+            "push": "4 x 10",
+            "realise": "3 x 10",
+        },
+    },
+    "overhead": {
+        "stability": {
+            "establish": "3 x 15 sec",
+            "build": "3 x 20 sec",
+            "push": "4 x 20 sec",
+            "realise": "3 x 20 sec",
+        },
+        "strength": {
+            "establish": "3 x 8",
+            "build": "3 x 6",
+            "push": "4 x 5",
+            "realise": "3 x 5",
+        },
+        "scapular": {
+            "establish": "2 x 12",
+            "build": "3 x 10",
+            "push": "3 x 10",
+            "realise": "3 x 10",
+        },
+        "integrated": {
+            "establish": "3 x 6",
+            "build": "3 x 5",
+            "push": "4 x 4",
+            "realise": "3 x 3",
+        },
+    },
+}
+
+STAGE_CUES = {
+    "strength": {
+        "main_lift": {
+            "establish": "Own position and produce force cleanly",
+            "build": "Increase output without losing shape",
+            "push": "Max force intent on every rep",
+            "realise": "Express force with clean, sharp reps",
+        },
+        "accessory": {
+            "establish": "Control the movement and build range",
+            "build": "Add load while keeping quality",
+            "push": "Strong output on every rep",
+            "realise": "Quality reps at reduced volume",
+        },
+    },
+    "brace": {
+        "iso": {
+            "establish": "Hold shape and control position",
+            "build": "Maintain stiffness for longer",
+            "push": "Resist movement and stay rigid",
+            "realise": "Show control with less total fatigue",
+        },
+        "dynamic": {
+            "establish": "Move with control and keep shape",
+            "build": "Repeat quality reps under control",
+            "push": "Strong trunk control on every rep",
+            "realise": "Sharp reps with reduced volume",
+        },
+    },
+    "overhead": {
+        "stability": {
+            "establish": "Own the overhead position",
+            "build": "Maintain stacked alignment",
+            "push": "Stabilise under greater demand",
+            "realise": "Show control with less fatigue",
+        },
+        "strength": {
+            "establish": "Press with control and full range",
+            "build": "Increase load with clean lockout",
+            "push": "Strong pressing intent every rep",
+            "realise": "Express pressing strength cleanly",
+        },
+        "scapular": {
+            "establish": "Find and hold scapular position",
+            "build": "Reinforce scapular control under load",
+            "push": "Maintain scapular set through full range",
+            "realise": "Show scapular control with less volume",
+        },
+        "integrated": {
+            "establish": "Hold overhead position through movement",
+            "build": "Maintain alignment under lower body load",
+            "push": "Full chain force transfer at high intent",
+            "realise": "Express integrated control cleanly",
+        },
+    },
 }
 
 # ═══════════════════════════════════════════════════════════════════════════

@@ -27,6 +27,9 @@ from data import (
     FMAX_ACCESSORIES,
     BRACE_EXERCISES,
     OVERHEAD_EXERCISES,
+    STAGE_MAP,
+    STAGE_PRESCRIPTIONS,
+    STAGE_CUES,
 )
 
 
@@ -106,6 +109,7 @@ class ProgrammeConfig:
     micro_sessions: int     # 0–5
     version: str            # "athlete" | "coach"
     programme_seed: int = 0 # shifts starting position in ranked pools
+    block_length: int = 4   # 4 | 6 | 8 week block
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -126,9 +130,6 @@ SECTION_MAX_EXERCISES = {
 # Fixed session section order (overrides programme-type ordering).
 SESSION_SECTION_ORDER = ["jumps", "strength", "brace", "overhead"]
 
-# Sections where the top-ranked exercise is locked into every session.
-SECTION_LOCK_TOP = {"strength"}
-
 # Jump day intent: maps session_number to desired jump_type.
 # Exercises matching the day's intent are selected first;
 # remaining slots are filled from the rest of the pool.
@@ -136,6 +137,36 @@ JUMP_DAY_INTENT = {
     1: "repeated",
     2: "max_output",
     3: "reactive",
+}
+
+# Stage-driven jump intent — the default jump progression model.
+#
+# Session intent is now stage-driven, not fixed. This map determines
+# which jump_type (repeated / max_output / reactive) is targeted for
+# slot 1 in each session, based on the current block stage.
+#
+# Early block (establish, build) remains stable — matching the fixed
+# baseline to build exposure, movement quality, and consistency across
+# all three adaptations before shifting emphasis.
+#
+# Late block (push, realise) shifts intent to drive adaptation:
+#   push    → force output emphasis (2 of 3 sessions target max_output)
+#   realise → stiffness emphasis (2 of 3 sessions target reactive)
+#
+# Stage bias (JUMP_STAGE_BIAS) remains secondary — it only refines
+# exercise selection within the chosen intent tier, acting as a
+# tie-breaker among exercises of the same jump_type.
+#
+# Pairing constraints (unilateral exclusion, pattern diversity, contrast
+# scoring) remain unchanged and always take priority over both intent
+# matching and stage bias.
+#
+# Falls back to JUMP_DAY_INTENT if stage is None.
+JUMP_DAY_INTENT_BY_STAGE = {
+    "establish": {1: "repeated",   2: "max_output", 3: "reactive"},
+    "build":     {1: "repeated",   2: "max_output", 3: "reactive"},
+    "push":      {1: "max_output", 2: "reactive",   3: "max_output"},
+    "realise":   {1: "reactive",   2: "max_output",  3: "reactive"},
 }
 
 # Biomechanics preference profile per jump day. Scored against exercise
@@ -255,15 +286,6 @@ def get_microdose_schedule(programme_type, limiting_factor, num_sessions):
 # EXERCISE TEXT
 # ═══════════════════════════════════════════════════════════════════════════
 
-def get_exercise_text(exercise, week, age_group, version):
-    """Return the formatted exercise string for a given week, age, and version."""
-    week_idx = min(week - 1, len(exercise["weeks"]) - 1)
-    w = exercise["weeks"][week_idx]
-    prescription = w["prescription"]
-    cue = w["cue"][age_group]
-    return f"{exercise['name']}  —  {prescription}\n    → {cue}"
-
-
 # ═══════════════════════════════════════════════════════════════════════════
 # SESSION BUILDING
 # ═══════════════════════════════════════════════════════════════════════════
@@ -287,6 +309,19 @@ _DAY2_CONTRAST_TRAITS = ("load", "tempo", "contraction_mode")
 
 # Penalty applied when slot 2 shares the same movement pattern as slot 1.
 _PATTERN_DUPLICATE_PENALTY = 3
+
+# Stage-based role bias for jump ranking.
+# Session intent (JUMP_DAY_INTENT) remains the primary driver of which
+# jump_type is selected for each session. Stage bias is secondary — it
+# only re-ranks candidates within the intent-matched tier, acting as a
+# tie-breaker. With intent bonus = 10 and max stage bias = 3, intent
+# always wins the first-order decision.
+JUMP_STAGE_BIAS = {
+    "establish": {"rfd": 2, "stiffness": 1, "repeatability": 3},
+    "build":     {"rfd": 3, "stiffness": 2, "repeatability": 1},
+    "push":      {"rfd": 3, "stiffness": 3, "repeatability": 0},
+    "realise":   {"rfd": 2, "stiffness": 3, "repeatability": 0},
+}
 
 
 def _is_unilateral(ex):
@@ -330,8 +365,8 @@ def _get_movement_pattern(ex):
     return "other"
 
 
-def _jump_composite_score(ex, intent, profile):
-    """Score a jump exercise against intent + day profile."""
+def _jump_composite_score(ex, intent, profile, stage=None):
+    """Score a jump exercise against intent + day profile + stage bias."""
     traits = ex.get("traits", {})
     bonus = 0
     if intent and traits.get("jump_type") == intent:
@@ -339,25 +374,30 @@ def _jump_composite_score(ex, intent, profile):
     bio = 0
     if profile and traits:
         bio = sum(1 for k, v in profile.items() if traits.get(k) == v)
-    return bonus + bio
+    stage_bonus = 0
+    if stage:
+        role = _JUMP_ROLE_MAP.get(traits.get("jump_type"), "")
+        stage_bonus = JUMP_STAGE_BIAS.get(stage, {}).get(role, 0)
+    return bonus + bio + stage_bonus
 
 
-def rank_jump_pool(selected, session_number):
-    """Rank jump exercises by intent match + day profile score.
+def rank_jump_pool(selected, session_number, stage=None):
+    """Rank jump exercises by intent match + day profile + stage bias.
 
     Stable sort: ties preserve original pool order.
     If no intent or profile is defined for this session_number, returns
-    the pool unchanged.
+    the pool unchanged (stage bias still applies if provided).
     """
-    intent = JUMP_DAY_INTENT.get(session_number)
+    intent_map = JUMP_DAY_INTENT_BY_STAGE.get(stage, JUMP_DAY_INTENT) if stage else JUMP_DAY_INTENT
+    intent = intent_map.get(session_number)
     profile = JUMP_DAY_PROFILE.get(session_number)
 
-    if not intent and not profile:
+    if not intent and not profile and not stage:
         return selected
 
     return sorted(
         selected,
-        key=lambda ex: _jump_composite_score(ex, intent, profile),
+        key=lambda ex: _jump_composite_score(ex, intent, profile, stage),
         reverse=True,
     )
 
@@ -375,13 +415,13 @@ def _rotate_within_tier(exercises, week, seed=0):
     return exercises[offset:] + exercises[:offset]
 
 
-def select_jump_pair(pool, session_number, week=1, seed=0):
+def select_jump_pair(pool, session_number, week=1, seed=0, stage=None):
     """Select a primary + complementary jump pair for the session.
 
-    Slot 1 (primary): ranked by intent + day profile, then offset
-        by seed within the intent-matched tier. The same pair is
-        selected for all weeks within a programme (week is not used
-        for exercise selection — only for prescription lookup).
+    Slot 1 (primary): ranked by intent + day profile + stage bias,
+        then offset by seed within the intent-matched tier. The same
+        pair is selected for all weeks within a programme (week is not
+        used for exercise selection — only for prescription lookup).
     Slot 2 (secondary): ranked by secondary profile from the
         remaining pool (excluding slot 1), offset by seed.
 
@@ -391,12 +431,13 @@ def select_jump_pair(pool, session_number, week=1, seed=0):
     if len(pool) <= 1:
         return list(pool)
 
-    intent = JUMP_DAY_INTENT.get(session_number)
+    intent_map = JUMP_DAY_INTENT_BY_STAGE.get(stage, JUMP_DAY_INTENT) if stage else JUMP_DAY_INTENT
+    intent = intent_map.get(session_number)
     profile = JUMP_DAY_PROFILE.get(session_number)
     secondary_profile = JUMP_SECONDARY_PROFILE.get(session_number)
 
-    # Rank the full pool
-    ranked = rank_jump_pool(pool, session_number)
+    # Rank the full pool (with stage bias if provided)
+    ranked = rank_jump_pool(pool, session_number, stage)
 
     # Partition into intent-matched and non-matched, preserving rank order
     matched = [ex for ex in ranked
@@ -470,10 +511,10 @@ def _deduplicate(exercises):
     return result
 
 
-def select_exercises_for_section(section_key, cfg, session_number=1):
+def select_exercises_for_section(section_key, cfg, session_number=1, stage=None):
     """Select and filter exercises for a single JOBS section.
 
-    Jumps: uses the jump pair selection system.
+    Jumps: uses the jump pair selection system (with optional stage bias).
     Strength: 1 locked main lift + 2 rotating accessories (no duplicates).
     Brace/Overhead: capped selection with day rotation (no duplicates).
     """
@@ -493,7 +534,7 @@ def select_exercises_for_section(section_key, cfg, session_number=1):
 
     # ── jump pair selection ──
     if section_key == "jumps":
-        selected = select_jump_pair(selected, session_number, cfg.week, cfg.programme_seed)
+        selected = select_jump_pair(selected, session_number, cfg.week, cfg.programme_seed, stage)
 
     # ── strength: 1 locked main lift + 2 rotating accessories ──
     elif section_key == "strength" and selected:
@@ -827,81 +868,198 @@ def select_overhead(cfg, session_number):
     return [stab_pick, sec_pick]
 
 
+# ── overhead role lookup (maps exercise name → overhead category) ──
+
+def _build_overhead_role_lookup():
+    lookup = {}
+    for role in OVERHEAD_EXERCISES:
+        for ex in OVERHEAD_EXERCISES[role]:
+            lookup[ex["name"]] = role
+    return lookup
+
+
+_OVERHEAD_ROLE_LOOKUP = _build_overhead_role_lookup()
+
+
 # ═══════════════════════════════════════════════════════════════════════════
-# PROGRAMME-LEVEL PROGRESSION
+# STAGE-BASED PROGRESSION
 # ═══════════════════════════════════════════════════════════════════════════
 
-MAIN_LIFT_PROGRESSION = {
-    1: {
-        "prescription": "4 x 6 @ 70–75%",
-        "cue": {
-            "senior": "Volume week; establish positions under moderate load; 2–3 min rest; every rep is a position check",
-            "youth": "Volume week; get every position right under moderate load; 2–3 min rest",
-            "junior": "Lots of reps this week; focus on doing every rep really well; rest 2–3 minutes",
-        },
-    },
-    2: {
-        "prescription": "4 x 5 @ 77–80%",
-        "cue": {
-            "senior": "Load increases; maintain the positions from W1; if quality drops, the load is too high",
-            "youth": "A bit heavier than last week; keep the same positions; drop the weight if form breaks",
-            "junior": "A bit heavier; do it exactly the same way as last week; go lighter if it gets messy",
-        },
-    },
-    3: {
-        "prescription": "4 x 4 @ 82–87%",
-        "cue": {
-            "senior": "Intensity week; fewer reps, heavier load; 3 min rest; intent and position are the metrics",
-            "youth": "Heavier but fewer reps; 3 min rest; technique must stay the same as lighter weeks",
-            "junior": "Heavier but fewer reps; rest 3 minutes; do every rep as well as the lighter weeks",
-        },
-    },
-    4: {
-        "prescription": "3 x 3 @ 87–92%",
-        "cue": {
-            "senior": "Peak week; maximal intent per rep; 3–4 min rest; every rep is a display of the block",
-            "youth": "Heaviest week; make every single rep your best; 3–4 min rest",
-            "junior": "The heaviest week; make every rep perfect; rest 3–4 minutes",
-        },
-    },
+def get_stage(block_length, current_week):
+    """Map current week to training stage based on block length."""
+    week_map = STAGE_MAP[block_length]
+    clamped = min(current_week, block_length)
+    return week_map[clamped]
+
+
+def get_prescription(section, role, stage):
+    """Look up the prescription string for a section/role/stage combination."""
+    return STAGE_PRESCRIPTIONS[section][role][stage]
+
+
+def get_cue(section, role, stage):
+    """Look up the coaching cue for a section/role/stage combination."""
+    return STAGE_CUES[section][role][stage]
+
+
+def _build_exercise_item(name, prescription, cue, video=None, **meta):
+    """Build a structured exercise item (data only, no display text).
+
+    Core fields: name, prescription, cue, video.
+    Additional metadata passed via **meta is merged into the item.
+    """
+    item = {
+        "name": name,
+        "prescription": prescription,
+        "cue": cue,
+        "video": video,
+    }
+    item.update(meta)
+    return item
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DISPLAY FORMATTING
+# ═══════════════════════════════════════════════════════════════════════════
+
+def format_exercise(section_key, exercise_item):
+    """Format a structured exercise item for visible output.
+
+    Jumps:                  Name  —  prescription\\n    → cue
+    Strength/Brace/Overhead: Name  —  prescription
+    """
+    name = exercise_item["name"]
+    rx = exercise_item["prescription"]
+    cue = exercise_item.get("cue", "")
+
+    if section_key == "jumps" and cue:
+        return f"{name}  —  {rx}\n    → {cue}"
+    return f"{name}  —  {rx}"
+
+
+def format_session(session_data):
+    """Format a full session's exercise items for visible output.
+
+    Returns the same structure with exercise dicts replaced by display strings.
+    """
+    formatted_sections = []
+    for section_key, exercises in session_data["sections"]:
+        texts = [format_exercise(section_key, ex) for ex in exercises]
+        formatted_sections.append((section_key, texts))
+
+    return {
+        **session_data,
+        "sections": formatted_sections,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SESSION BUILDING
+# ═══════════════════════════════════════════════════════════════════════════
+
+_JUMP_ROLE_MAP = {
+    "max_output": "rfd",
+    "reactive": "stiffness",
+    "repeated": "repeatability",
 }
 
 
-def _apply_main_lift_override(exercise, cfg):
-    """Replace the main lift prescription with programme-level progression."""
-    week = min(cfg.week, max(MAIN_LIFT_PROGRESSION.keys()))
-    prog = MAIN_LIFT_PROGRESSION[week]
-    prescription = prog["prescription"]
-    cue = prog["cue"][cfg.age_group]
-    return f"{exercise['name']}  —  {prescription}\n    → {cue}"
-
-
 def build_session_data(day_number, session_number, total_main, cfg):
-    """Build the structured data for a main session (no formatting)."""
+    """Build the structured data for a main session.
+
+    Routes each JOBS section to the appropriate selector and prescription path:
+    - Jumps: existing exercise library + week-based cues
+    - Strength: FMAX selection + stage-based prescriptions
+    - Brace: brace selection + subtype prescriptions (iso/dynamic)
+    - Overhead: overhead selection + role prescriptions
+    """
     available = set(get_sections_for_duration(cfg.focus, cfg.duration))
-    # Fixed section order: Jumps → Strength → Brace → Overhead
     sections = [s for s in SESSION_SECTION_ORDER if s in available]
     vol_modifier = COMPETITION_PROXIMITY[cfg.proximity]["volume_modifier"]
     warmup_key = "short" if cfg.duration == 30 else "full"
+    stage = get_stage(cfg.block_length, cfg.week)
 
     session_sections = []
     for section_key in sections:
-        exercises = select_exercises_for_section(section_key, cfg, session_number)
-        exercise_texts = []
-        for ex_idx, ex in enumerate(exercises):
-            # Override main lift (first exercise in locked strength section)
-            if (section_key in SECTION_LOCK_TOP
-                    and ex_idx == 0
-                    and cfg.week in MAIN_LIFT_PROGRESSION):
-                text = _apply_main_lift_override(ex, cfg)
-            else:
-                text = get_exercise_text(ex, cfg.week, cfg.age_group, cfg.version)
-            if vol_modifier < 0:
+
+        if section_key == "jumps":
+            # ── jumps: existing selection + week-based data ──
+            exercises = select_exercises_for_section(section_key, cfg, session_number, stage)
+            exercise_texts = []
+            for ex in exercises:
                 week_idx = min(cfg.week - 1, len(ex["weeks"]) - 1)
-                orig = ex["weeks"][week_idx]["prescription"]
-                mod = apply_volume_modifier(orig, vol_modifier)
-                text = text.replace(orig, mod)
-            exercise_texts.append(text)
+                w = ex["weeks"][week_idx]
+                rx = w["prescription"]
+                cue = w["cue"][cfg.age_group]
+                if vol_modifier < 0:
+                    rx = apply_volume_modifier(rx, vol_modifier)
+                exercise_texts.append(_build_exercise_item(
+                    ex["name"], rx, cue, ex.get("video"),
+                    section="jumps",
+                    role=_JUMP_ROLE_MAP.get(
+                        ex.get("traits", {}).get("jump_type")),
+                    equipment=ex.get("equipment"),
+                    eccentric_heavy=ex.get("eccentric_heavy"),
+                ))
+
+        elif section_key == "strength":
+            # ── strength: FMAX selection + stage prescriptions ──
+            exercises = select_fmax_strength(cfg, session_number)
+            exercise_texts = []
+            for i, ex in enumerate(exercises):
+                role = "main_lift" if i == 0 else "accessory"
+                rx = get_prescription("strength", role, stage)
+                cue = get_cue("strength", role, stage)
+                exercise_texts.append(_build_exercise_item(
+                    ex["name"], rx, cue, ex.get("video"),
+                    section="strength",
+                    role=role,
+                    pattern=ex.get("pattern"),
+                    region=ex.get("region"),
+                    laterality=ex.get("laterality"),
+                    equipment_type=ex.get("equipment_type"),
+                    equipment_level=ex.get("equipment_level"),
+                ))
+
+        elif section_key == "brace":
+            # ── brace: subtype-based prescriptions (iso / dynamic) ──
+            exercises = select_brace(cfg, session_number)
+            exercise_texts = []
+            for ex in exercises:
+                rx = get_prescription("brace", ex["subtype"], stage)
+                cue = get_cue("brace", ex["subtype"], stage)
+                exercise_texts.append(_build_exercise_item(
+                    ex["name"], rx, cue, ex.get("video"),
+                    section="brace",
+                    role=ex["subtype"],
+                    requires_support=ex.get("requires_support"),
+                    equipment_type=ex.get("equipment_type"),
+                    equipment_level=ex.get("equipment_level"),
+                ))
+
+        elif section_key == "overhead":
+            # ── overhead: role-based prescriptions ──
+            exercises = select_overhead(cfg, session_number)
+            exercise_texts = []
+            for ex in exercises:
+                role = _OVERHEAD_ROLE_LOOKUP[ex["name"]]
+                rx = get_prescription("overhead", role, stage)
+                cue = get_cue("overhead", role, stage)
+                exercise_texts.append(_build_exercise_item(
+                    ex["name"], rx, cue, ex.get("video"),
+                    section="overhead",
+                    role=role,
+                    pattern=ex.get("pattern"),
+                    region=ex.get("region"),
+                    laterality=ex.get("laterality"),
+                    equipment_type=ex.get("equipment_type"),
+                    equipment_level=ex.get("equipment_level"),
+                    requires_support=ex.get("requires_support"),
+                ))
+
+        else:
+            continue
+
         session_sections.append((section_key, exercise_texts))
 
     warmup_items = WARMUP[warmup_key]
@@ -911,6 +1069,7 @@ def build_session_data(day_number, session_number, total_main, cfg):
         "day_number": day_number,
         "session_number": session_number,
         "total_main": total_main,
+        "stage": stage,
         "sections": session_sections,
         "warmup": warmup_items,
         "cooldown": cooldown_items,
