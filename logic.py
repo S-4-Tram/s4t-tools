@@ -26,6 +26,7 @@ from data import (
     FMAX_MACHINE_ACCESSORIES,
     FMAX_ACCESSORIES,
     BRACE_EXERCISES,
+    OVERHEAD_EXERCISES,
 )
 
 
@@ -772,6 +773,58 @@ def select_brace(cfg, session_number):
     sec_pick = second_pool[sec_idx]
 
     return [lat_pick, sec_pick]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# OVERHEAD SELECTION
+# ═══════════════════════════════════════════════════════════════════════════
+
+def select_overhead(cfg, session_number):
+    """Select 2 overhead exercises: 1 stability + 1 strength, scapular, or integrated.
+
+    Stability is always selected first.
+    Second exercise: ~60% strength, ~20% scapular, ~20% integrated.
+    Selected stability exercise excluded from second pool.
+    Dynamic retained in data but not in default rotation.
+    Deterministic rotation using session_number + programme_seed.
+    """
+    stability = _fmax_filter_by_equipment(OVERHEAD_EXERCISES["stability"], cfg.equipment)
+    strength = _fmax_filter_by_equipment(OVERHEAD_EXERCISES["strength"], cfg.equipment)
+    scapular = _fmax_filter_by_equipment(OVERHEAD_EXERCISES["scapular"], cfg.equipment)
+    integrated = _fmax_filter_by_equipment(OVERHEAD_EXERCISES["integrated"], cfg.equipment)
+
+    if not stability:
+        return []
+
+    stab_idx = (session_number - 1 + cfg.programme_seed) % len(stability)
+    stab_pick = stability[stab_idx]
+
+    # 60% strength / 20% scapular / 20% integrated
+    rotation = (session_number - 1 + cfg.programme_seed) % 5
+    if rotation < 3 and strength:
+        second_pool = strength
+    elif rotation == 3 and scapular:
+        second_pool = scapular
+    elif rotation == 4 and integrated:
+        second_pool = integrated
+    elif strength:
+        second_pool = strength
+    elif scapular:
+        second_pool = scapular
+    elif integrated:
+        second_pool = integrated
+    else:
+        return [stab_pick]
+
+    second_pool = [ex for ex in second_pool if ex["name"] != stab_pick["name"]]
+
+    if not second_pool:
+        return [stab_pick]
+
+    sec_idx = (session_number - 1 + cfg.programme_seed) % len(second_pool)
+    sec_pick = second_pool[sec_idx]
+
+    return [stab_pick, sec_pick]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
