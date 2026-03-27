@@ -3188,6 +3188,241 @@ FMAX_ACCESSORIES = {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
+# BRACE — TRUNK STIFFNESS & FORCE TRANSFER
+# ═══════════════════════════════════════════════════════════════════════════
+
+BRACE_EXERCISES = {
+    "anterior": [
+        # ── hollow family ──
+        {
+            "name": "Hollow Hold",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": None,
+        },
+        {
+            "name": "Hollow Hold w/ Rocks",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/ifYSHcGTDss",
+        },
+        {
+            "name": "Hollow Hold w/ Press",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/cChI-QTUbPU",
+        },
+        # ── front support family ──
+        {
+            "name": "Front Support Open Hold",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://www.youtube.com/shorts/9ypDDHle--o",
+        },
+        {
+            "name": "Front Support Alternate Limb Raise",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/LciUxwWhD6A",
+        },
+        {
+            "name": "Front Support Hops",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/7a4l95CNjuE",
+        },
+        # ── supine line hold family ──
+        {
+            "name": "Supine Line Hold",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/cc-IU-zhxWM",
+        },
+        {
+            "name": "Supine Hold w/ Press",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/jVQjbibn7Ds",
+        },
+        {
+            "name": "Supine Hold w/ Raise",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/KurZbCKD5AQ",
+        },
+        # ── table top family ──
+        {
+            "name": "Table Top Holds",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://www.youtube.com/shorts/TdBnDP0NJUE",
+        },
+        # ── deadbugs ──
+        {
+            "name": "Deadbugs",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": False,
+            "video": "https://www.youtube.com/shorts/NsI3L2PMj2o",
+        },
+        # ── v-sit / tuck family ──
+        {
+            "name": "V-Sit Line Outs",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://www.youtube.com/shorts/AXz7ZprWQE8",
+        },
+        {
+            "name": "Tuck Ups (Continuous)",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/kOI2k-u3YPQ",
+        },
+    ],
+    "lateral": [
+        # ── lateral line hold family ──
+        {
+            "name": "Lateral Line Hold",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/3DkGfvdPZrA",
+        },
+        {
+            "name": "Lateral Hold w/ Press",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/D-wng4X0OrY",
+        },
+        {
+            "name": "Lateral Hold w/ Raise",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": None,
+        },
+        {
+            "name": "Lateral Line Hold w/ Torso Raise",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/oZfJA8Nails",
+        },
+        # ── side plank family ──
+        {
+            "name": "Side Plank Stars",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://www.youtube.com/shorts/p5mBtDHne34",
+        },
+        {
+            "name": "Side Plank Rotations",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": None,
+        },
+        {
+            "name": "Side Plank w/ Hip Dips",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/1ObSUkAZkXk",
+        },
+        # ── loaded side plank family ──
+        {
+            "name": "Loaded Side Plank",
+            "equipment_type": ["dumbbell"],
+            "equipment_level": ["partial"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/ZFnn4HjEmBI",
+        },
+        {
+            "name": "Loaded Side Plank (Arm Raised)",
+            "equipment_type": ["dumbbell"],
+            "equipment_level": ["partial"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/CcbUCuH-iwk",
+        },
+        {
+            "name": "Loaded Side Plank Hip Lifts (Arm Raised)",
+            "equipment_type": ["dumbbell"],
+            "equipment_level": ["partial"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/ak4r-a8HLlM",
+        },
+        # ── drags ──
+        {
+            "name": "Low Plank Drags",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/Ox8zptCafio",
+        },
+        {
+            "name": "Table Top Drags",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/q-ZJ4nxr7ys",
+        },
+    ],
+    "posterior": [
+        # ── prone line hold family ──
+        {
+            "name": "Prone Line Hold",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/FYi4jJeUjx4",
+        },
+        {
+            "name": "Prone Hold w/ Row",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/aO-CzZ_6lvs",
+        },
+        {
+            "name": "Prone Hold w/ Raise",
+            "equipment_type": ["bodyweight", "dumbbell"],
+            "equipment_level": ["bodyweight", "partial"],
+            "requires_support": True,
+            "video": "https://youtube.com/shorts/Fsa-TLgwkgk",
+        },
+        # ── standalone posterior ──
+        {
+            "name": "Oh Dorsal Raise with Slow Lower",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/x_rrbw_IPg0",
+        },
+        {
+            "name": "Rotating Side Plank",
+            "equipment_type": ["bodyweight"],
+            "equipment_level": ["bodyweight"],
+            "requires_support": False,
+            "video": "https://youtube.com/shorts/n40td4Idpvc",
+        },
+    ],
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
 # ASSEMBLED EXERCISE LIBRARY
 # ═══════════════════════════════════════════════════════════════════════════
 

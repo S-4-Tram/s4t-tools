@@ -22,6 +22,10 @@ from data import (
     COOLDOWN,
     COOLDOWN_SHORT,
     _BONUS_EXERCISES,
+    FMAX_MAIN_LIFTS,
+    FMAX_MACHINE_ACCESSORIES,
+    FMAX_ACCESSORIES,
+    BRACE_EXERCISES,
 )
 
 
@@ -528,6 +532,246 @@ def select_exercises_for_section(section_key, cfg, session_number=1):
                     selected.append(bonus)
 
     return selected
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FMAX STRENGTH SELECTION
+# ═══════════════════════════════════════════════════════════════════════════
+
+FMAX_EQUIPMENT_MAP = {
+    "full": "full_gym",
+    "limited": "partial",
+    "bodyweight": "bodyweight",
+}
+
+FMAX_EQUIPMENT_RANK = {
+    "bodyweight": 0,
+    "partial": 1,
+    "full_gym": 2,
+}
+
+PATTERN_COMPLEMENTS = {
+    "squat": ["calf", "hip_extension", "hip_abduction", "hip_adduction"],
+    "hinge": ["quad", "calf", "hip_abduction", "hip_adduction"],
+    "split_squat": ["calf", "hip_extension", "hip_abduction"],
+    "step_up": ["calf", "hip_extension", "hip_abduction"],
+    "single_leg_hinge": ["quad", "calf", "hip_abduction"],
+    "calf_raise": ["quad", "hamstring", "hip_abduction"],
+}
+
+REGION_WEIGHTS = {
+    "quad": 5,
+    "calf": 5,
+    "hamstring": 3,
+    "hip_extension": 3,
+    "hip_abduction": 2,
+    "hip_adduction": 2,
+    "hip_flexion": 1,
+}
+
+
+def _build_fmax_category_lookup():
+    """Build a name → category lookup from the FMAX accessory data structures.
+
+    For non-machine accessories, category is the FMAX_ACCESSORIES dict key.
+    For machine accessories, category is derived from pattern (hip variants)
+    or region (quad, hamstring, calf).
+    """
+    lookup = {}
+    for cat, exs in FMAX_ACCESSORIES.items():
+        for ex in exs:
+            lookup[ex["name"]] = cat
+    for ex in FMAX_MACHINE_ACCESSORIES:
+        if ex["pattern"] in ("hip_adduction", "hip_abduction"):
+            lookup[ex["name"]] = ex["pattern"]
+        else:
+            lookup[ex["name"]] = ex["region"]
+    return lookup
+
+
+_FMAX_CATEGORY_LOOKUP = _build_fmax_category_lookup()
+
+
+def _fmax_filter_by_equipment(exercises, equipment):
+    """Filter FMAX exercises to those available at the given equipment level."""
+    rank = FMAX_EQUIPMENT_RANK[FMAX_EQUIPMENT_MAP[equipment]]
+    return [ex for ex in exercises
+            if any(FMAX_EQUIPMENT_RANK[el] <= rank for el in ex["equipment_level"])]
+
+
+def _fmax_build_accessory_pool(equipment):
+    """Combine machine and non-machine accessories, filtered by equipment.
+
+    Machine accessories included only at full_gym.
+    Non-machine accessories included at all relevant equipment levels.
+    """
+    rank = FMAX_EQUIPMENT_RANK[FMAX_EQUIPMENT_MAP[equipment]]
+    pool = []
+
+    if FMAX_EQUIPMENT_MAP[equipment] == "full_gym":
+        pool.extend(FMAX_MACHINE_ACCESSORIES)
+
+    for category, exercises in FMAX_ACCESSORIES.items():
+        for ex in exercises:
+            if any(FMAX_EQUIPMENT_RANK[el] <= rank for el in ex["equipment_level"]):
+                pool.append(ex)
+
+    return pool
+
+
+def select_fmax_strength(cfg, session_number):
+    """Select 1 main lift + 2 accessories for an Fmax strength block.
+
+    Main lift: rotated from FMAX_MAIN_LIFTS, filtered by equipment.
+    Accessory 1: different name, region, and pattern from main lift.
+        Relaxes constraints gracefully if pool is sparse.
+    Accessory 2: from a complement category to the main lift pattern.
+        Falls back to remaining pool if no complement match.
+
+    Both accessories sorted by REGION_WEIGHTS (quad/calf bias)
+    and rotated deterministically by session_number + programme_seed.
+    No duplicate names within the block.
+    """
+    # ── flatten and filter main lifts ──
+    all_mains = []
+    for slot, exercises in FMAX_MAIN_LIFTS.items():
+        all_mains.extend(exercises)
+    mains = _fmax_filter_by_equipment(all_mains, cfg.equipment)
+    if not mains:
+        return []
+
+    # Sort by region weight (descending), rotate by session + seed
+    mains.sort(key=lambda ex: REGION_WEIGHTS.get(ex["region"], 1), reverse=True)
+    main_idx = (session_number - 1 + cfg.programme_seed) % len(mains)
+    main_lift = mains[main_idx]
+
+    # ── build accessory pool ──
+    accessory_pool = _fmax_build_accessory_pool(cfg.equipment)
+
+    # ── accessory 1: different name, region, and pattern from main ──
+    acc1_candidates = [
+        ex for ex in accessory_pool
+        if ex["name"] != main_lift["name"]
+        and ex["region"] != main_lift["region"]
+        and ex["pattern"] != main_lift["pattern"]
+    ]
+    # Fallback: relax pattern constraint
+    if not acc1_candidates:
+        acc1_candidates = [
+            ex for ex in accessory_pool
+            if ex["name"] != main_lift["name"]
+            and ex["region"] != main_lift["region"]
+        ]
+    # Fallback: relax region constraint
+    if not acc1_candidates:
+        acc1_candidates = [
+            ex for ex in accessory_pool
+            if ex["name"] != main_lift["name"]
+        ]
+
+    acc1_candidates.sort(
+        key=lambda ex: REGION_WEIGHTS.get(
+            _FMAX_CATEGORY_LOOKUP.get(ex["name"], ""), 1),
+        reverse=True)
+
+    acc1 = None
+    if acc1_candidates:
+        acc1_idx = (session_number - 1 + cfg.programme_seed) % len(acc1_candidates)
+        acc1 = acc1_candidates[acc1_idx]
+
+    # ── accessory 2: complement to main lift pattern, avoid acc1 overlap ──
+    complement_cats = PATTERN_COMPLEMENTS.get(main_lift["pattern"], [])
+    used_names = {main_lift["name"]}
+    if acc1:
+        used_names.add(acc1["name"])
+
+    # Preferred: complement category + different region and pattern from acc1
+    acc2_candidates = [
+        ex for ex in accessory_pool
+        if _FMAX_CATEGORY_LOOKUP.get(ex["name"]) in complement_cats
+        and ex["name"] not in used_names
+        and (acc1 is None or ex["region"] != acc1["region"])
+        and (acc1 is None or ex["pattern"] != acc1["pattern"])
+    ]
+    # Relax: complement category + different region from acc1
+    if not acc2_candidates:
+        acc2_candidates = [
+            ex for ex in accessory_pool
+            if _FMAX_CATEGORY_LOOKUP.get(ex["name"]) in complement_cats
+            and ex["name"] not in used_names
+            and (acc1 is None or ex["region"] != acc1["region"])
+        ]
+    # Relax: complement category only
+    if not acc2_candidates:
+        acc2_candidates = [
+            ex for ex in accessory_pool
+            if _FMAX_CATEGORY_LOOKUP.get(ex["name"]) in complement_cats
+            and ex["name"] not in used_names
+        ]
+    # Fallback: any remaining exercise
+    if not acc2_candidates:
+        acc2_candidates = [
+            ex for ex in accessory_pool
+            if ex["name"] not in used_names
+        ]
+
+    acc2_candidates.sort(
+        key=lambda ex: REGION_WEIGHTS.get(
+            _FMAX_CATEGORY_LOOKUP.get(ex["name"], ""), 1),
+        reverse=True)
+
+    acc2 = None
+    if acc2_candidates:
+        acc2_idx = (session_number - 1 + cfg.programme_seed) % len(acc2_candidates)
+        acc2 = acc2_candidates[acc2_idx]
+
+    # ── assemble ──
+    result = [main_lift]
+    if acc1:
+        result.append(acc1)
+    if acc2:
+        result.append(acc2)
+
+    return result
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BRACE SELECTION
+# ═══════════════════════════════════════════════════════════════════════════
+
+def select_brace(cfg, session_number):
+    """Select 2 brace exercises: 1 lateral + 1 anterior or posterior.
+
+    Lateral is always selected first.
+    Second exercise biased ~70/30 toward anterior over posterior.
+    Deterministic rotation using session_number + programme_seed.
+    """
+    lateral = _fmax_filter_by_equipment(BRACE_EXERCISES["lateral"], cfg.equipment)
+    anterior = _fmax_filter_by_equipment(BRACE_EXERCISES["anterior"], cfg.equipment)
+    posterior = _fmax_filter_by_equipment(BRACE_EXERCISES["posterior"], cfg.equipment)
+
+    if not lateral:
+        return []
+
+    lat_idx = (session_number - 1 + cfg.programme_seed) % len(lateral)
+    lat_pick = lateral[lat_idx]
+
+    # Bias ~70/30 toward anterior: use 7 of every 10 sessions for anterior
+    rotation = (session_number - 1 + cfg.programme_seed) % 10
+    if rotation < 7 and anterior:
+        second_pool = anterior
+    elif posterior:
+        second_pool = posterior
+    else:
+        second_pool = anterior or posterior
+
+    if not second_pool:
+        return [lat_pick]
+
+    sec_idx = (session_number - 1 + cfg.programme_seed) % len(second_pool)
+    sec_pick = second_pool[sec_idx]
+
+    return [lat_pick, sec_pick]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
