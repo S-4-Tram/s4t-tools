@@ -956,6 +956,27 @@ def format_session(session_data):
 # ═══════════════════════════════════════════════════════════════════════════
 # SESSION BUILDING
 # ═══════════════════════════════════════════════════════════════════════════
+#
+# Progression model across sections:
+#
+# Jumps use stage-driven selection — the primary intent (which jump_type
+# is targeted) changes across the block via JUMP_DAY_INTENT_BY_STAGE.
+# This reflects the need for varied SSC exposure: different stages
+# emphasise repeatability, force output, or stiffness to drive
+# adaptation through stimulus variation.
+#
+# Strength, Brace, and Overhead use stable exercise selection within a
+# block — the same exercises are selected for a given session_number +
+# programme_seed regardless of stage. Progression in these sections
+# comes from prescription and cue changes (STAGE_PRESCRIPTIONS,
+# STAGE_CUES), not exercise variation. This reflects the need for
+# repetition: strength, trunk stiffness, and overhead control develop
+# through consistent practice of the same movement patterns under
+# progressively greater demand.
+#
+# This distinction is intentional. Exercise variation drives jump
+# adaptation. Exercise consistency drives strength, brace, and
+# overhead adaptation.
 
 _JUMP_ROLE_MAP = {
     "max_output": "rfd",
