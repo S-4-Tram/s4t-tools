@@ -25,16 +25,17 @@ A simple command-line tool that generates a personalised weekly strength and con
    python3 programme_generator.py
    ```
 
-3. Answer the four questions when prompted:
+3. Answer the questions when prompted:
 
    | Question | Example answer |
    |---|---|
    | Athlete name | Jamie Smith |
+   | Programme type | Repeated Power |
+   | Week number | 2 |
    | Main sessions per week | 3 |
    | Micro-dose sessions per week | 2 |
-   | Training focus (pick a number) | 1 |
 
-4. Your programme is printed to the screen **and** saved automatically to `weekly_programme.txt` in the same folder.
+4. Your programme is printed to the screen **and** saved automatically to `weekly_programme.txt`.
 
 ---
 
@@ -67,7 +68,7 @@ The programme is saved to `weekly_programme.txt` each time you run the script. R
 
 ## Customising the programme
 
-All exercises are stored in the `EXERCISE_LIBRARY` dictionary near the top of `programme_generator.py`. You can:
+All exercises are stored in the `EXERCISE_LIBRARY` dictionary in `data.py`. You can:
 
 - Add or swap exercises by editing the lists under each focus area
 - Adjust sets and reps by changing the text in those lists
